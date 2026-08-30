@@ -1,0 +1,81 @@
+.yearNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.yearNavBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-charcoal-soft);
+  font-size: 16px;
+}
+
+.yearNavBtn:disabled {
+  opacity: 0.4;
+}
+
+.yearLabel {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  min-width: 76px;
+  text-align: center;
+}
+
+.backBtn {
+  margin-left: auto;
+  min-height: 38px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+}
+
+.summary {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.summaryTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  margin-bottom: var(--space-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-mint-pill);
+  border: 1px solid var(--color-aqua-pale);
+  font-size: 12.5px;
+}
+
+.chipLabel {
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.chipMeta {
+  color: var(--text-muted);
+}

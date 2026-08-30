@@ -1,0 +1,355 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.greeting {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.hello {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-charcoal-soft);
+}
+
+.title {
+  margin-top: 4px;
+  font-size: clamp(20px, 2.4vw, 28px);
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+/* 남은 연차 인라인 편집 */
+.leaveBox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-mint-pill);
+  border: 1.5px solid var(--color-teal-light);
+}
+
+.leaveLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-teal-dark);
+  white-space: nowrap;
+}
+
+.leaveLabel strong {
+  font-weight: 800;
+}
+
+.leaveInput {
+  width: 58px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-teal-light);
+  background: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  text-align: right;
+}
+
+.leaveUnit {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.expiryNote {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-mint-pill);
+  border: 1px solid var(--color-aqua-pale);
+  font-size: 13px;
+  color: var(--text-charcoal-soft);
+  line-height: 1.5;
+}
+
+.expiryNote strong {
+  color: var(--color-teal-dark);
+}
+
+.inlineLink {
+  background: none;
+  border: none;
+  padding: 0 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+  text-decoration: underline;
+}
+
+.clearBtn {
+  width: 100%;
+  margin-top: var(--space-3);
+  padding: 10px;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.warn {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-coral);
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.calendarCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 1200px) {
+  .layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .calendarCol {
+    flex: 1;
+  }
+
+  .sideCol {
+    width: 320px;
+    flex: none;
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+
+/* 달력 아래 선택 결과 바 */
+.resultBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #eaf6f7 0%, #f3ead8 100%);
+  border: 1px solid var(--border-subtle);
+}
+
+.resultEmoji {
+  font-size: 30px;
+  flex: none;
+}
+
+.resultBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.resultLabel {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+}
+
+.resultHeadline {
+  margin-top: 2px;
+  font-size: clamp(17px, 2vw, 21px);
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.resultRange {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.saveBtn {
+  flex: none;
+  padding: 11px 18px;
+  min-height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-teal-dark);
+  background: #fff;
+  color: var(--color-teal-dark);
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.saveBtnActive {
+  background: var(--color-teal-dark);
+  color: #fff;
+}
+
+/* 우측 요약 */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+}
+
+.cardTitle {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  margin-bottom: var(--space-3);
+}
+
+.summaryRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.summaryRow:last-of-type {
+  border-bottom: none;
+}
+
+.summaryValue {
+  font-weight: 800;
+  color: var(--text-charcoal);
+  font-size: 14.5px;
+}
+
+.summaryHighlight {
+  color: var(--color-teal-dark);
+  font-size: 17px;
+}
+
+.blockList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.blockItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 11px var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+  text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .blockItem:hover {
+    border-color: var(--color-teal-light);
+    transform: translateY(-1px);
+  }
+}
+
+.blockItemActive {
+  border-color: var(--color-teal);
+  background: var(--bg-mint-pill);
+}
+
+.blockEmoji {
+  font-size: 20px;
+  flex: none;
+}
+
+.blockBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.blockLabel {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+}
+
+.blockMeta {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.blockRest {
+  flex: none;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  padding: var(--space-6) var(--space-4);
+}
+
+.emptyMascot {
+  width: 130px;
+}
+
+.emptyText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+}
+
+.emptyHint {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.notice {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--card-yellow);
+  border: 1px solid var(--card-yellow-border);
+  font-size: 12.5px;
+  color: var(--text-charcoal-soft);
+}
+
+.policyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+  text-decoration: underline;
+}

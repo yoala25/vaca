@@ -1,0 +1,152 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: min(72vh, 640px);
+  padding: var(--space-5) 0;
+}
+
+.card {
+  width: min(100%, 520px);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, #eaf6f7 0%, #f3ead8 100%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+/* 사각형 크롭 이미지라 가장자리를 지워 카드 배경에 스며들게 한다. */
+.mascot {
+  width: min(60%, 220px);
+  margin: 0 auto;
+  -webkit-mask-image: radial-gradient(
+    ellipse 50% 48% at 50% 47%,
+    #000 50%,
+    rgba(0, 0, 0, 0.5) 78%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 50% 48% at 50% 47%,
+    #000 50%,
+    rgba(0, 0, 0, 0.5) 78%,
+    transparent 100%
+  );
+}
+
+.hello {
+  margin-top: var(--space-3);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-charcoal-soft);
+}
+
+.title {
+  margin-top: var(--space-2);
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 800;
+  color: var(--text-charcoal);
+  line-height: 1.35;
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.input {
+  width: 120px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-teal-light);
+  background: #fff;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  text-align: center;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-teal-dark);
+}
+
+.unit {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.quickRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.quickChip {
+  min-height: 40px;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+}
+
+.quickChipActive {
+  border-color: var(--color-teal);
+  background: #fff;
+  color: var(--color-teal-dark);
+}
+
+.expiry {
+  margin-top: var(--space-4);
+  font-size: 12.5px;
+  color: var(--text-charcoal-soft);
+}
+
+.expiryLink {
+  background: none;
+  border: none;
+  padding: 0 0 0 4px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+  text-decoration: underline;
+}
+
+.cta {
+  width: 100%;
+  margin-top: var(--space-5);
+  padding: 17px;
+  min-height: 52px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-teal-dark);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(15, 106, 110, 0.25);
+}
+
+.cta:hover {
+  background: var(--color-teal);
+}
+
+.cta:disabled {
+  background: var(--border-subtle);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.caption {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--text-muted);
+}

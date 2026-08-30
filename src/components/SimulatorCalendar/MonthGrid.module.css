@@ -1,0 +1,216 @@
+.month {
+  min-width: 0;
+}
+
+.monthTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  margin-bottom: var(--space-2);
+  padding-left: 2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding-bottom: 6px;
+}
+
+.sun {
+  color: var(--color-coral);
+}
+
+.sat {
+  color: var(--color-blue);
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-charcoal-soft);
+  cursor: pointer;
+}
+
+.cell:disabled {
+  cursor: default;
+}
+
+.outside {
+  visibility: hidden;
+}
+
+/* 휴식 구간을 잇는 옅은 민트 띠. 셀 사이 간격이 없어야 이어져 보인다. */
+.band {
+  position: absolute;
+  inset: 10% 0;
+  background: #e4f2ee;
+  transition: background-color 0.25s ease;
+}
+
+.bandStart {
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+.bandEnd {
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.bandSelected {
+  background: #cfe9e1;
+}
+
+/* 숫자만 감싸는 원. 셀 전체를 덮으면 아래 라벨이 잘린다. */
+.dayTop {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+.leaveDot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-teal);
+  transition: background-color 0.2s ease;
+}
+
+.manualDot {
+  background: var(--color-teal-dark);
+  box-shadow: 0 0 0 2px rgba(25, 136, 141, 0.25);
+}
+
+.partialDot {
+  background: linear-gradient(90deg, var(--color-teal) 50%, #b6ded5 50%);
+}
+
+.partialDotEnd {
+  background: linear-gradient(90deg, #b6ded5 50%, var(--color-teal) 50%);
+}
+
+.number {
+  position: relative;
+  z-index: 1;
+  line-height: 1.1;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.holidayText {
+  color: var(--color-coral);
+}
+
+.holidayLabel {
+  color: var(--color-coral);
+}
+
+/* 원 안에 들어간 날짜 숫자만 흰색으로 만든다. */
+.leaveText .number {
+  color: #fff;
+}
+
+.leaveLabel {
+  color: var(--color-teal-dark);
+}
+
+.today .number {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 연간 보기처럼 칸이 작을 때는 라벨을 숨기고 숫자만 남긴다. */
+.compact .cell {
+  font-size: 11px;
+}
+
+.compact .dayTop {
+  width: 22px;
+  height: 22px;
+}
+
+.compact .label {
+  display: none;
+}
+
+.compact .monthTitle {
+  font-size: 13px;
+}
+
+/* "휴가 추가 +1" 토스트 */
+.toast {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-teal-dark);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+}
+
+.toastRemove {
+  background: var(--text-muted);
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -4px);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,58 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-6) var(--space-6) var(--space-7);
+}
+
+.mainInner {
+  width: min(100%, var(--main-max-width));
+  margin: 0 auto;
+}
+
+.mobileShell {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+/* 상단바·하단탭과 화면 가장자리(노치·홈 인디케이터)를 피한 본문 영역 */
+.mobileBody {
+  padding: var(--space-4) var(--space-4)
+    calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-5));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+}
+
+.fullScreen {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+@media (min-width: 768px) {
+  .fullScreen {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-6) var(--space-4);
+    background: linear-gradient(155deg, #eaf6f7 0%, #f3ead8 100%);
+  }
+
+  .fullScreenCard {
+    width: min(100%, 480px);
+    min-height: calc(100vh - var(--space-6) * 2);
+    background: var(--bg-page);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card-hover);
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1199px) {
+  .main {
+    padding: var(--space-5) var(--space-4) var(--space-6);
+  }
+}

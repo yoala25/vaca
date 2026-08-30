@@ -1,0 +1,27 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  background: linear-gradient(180deg, #dff1f4 0%, #eef6ea 55%, #fdf8ea 100%);
+}
+
+.mascot {
+  width: min(70vw, 240px);
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-charcoal-soft);
+  line-height: 1.5;
+}

@@ -1,0 +1,68 @@
+:root {
+  /* backgrounds */
+  --bg-page: #fdfbf5;
+  --bg-sidebar: #fefbf6;
+  --bg-card: #ffffff;
+  --bg-mint-pill: #eff8fa;
+  --bg-selected-menu: #ecf4f2;
+  --bg-input: #f6f4ee;
+
+  /* vacation card pastels */
+  --card-yellow: #fef9ee;
+  --card-yellow-border: #f4e4b8;
+  --card-pink: #fef4f6;
+  --card-pink-border: #f6d3da;
+  --card-blue: #f5f8fe;
+  --card-blue-border: #d6e3f7;
+  --card-green: #f7faf5;
+  --card-green-border: #d9e9d3;
+
+  /* brand */
+  --color-teal: #19888d;
+  --color-teal-dark: #0f6a6e;
+  --color-teal-light: #4fa8ac;
+  --color-aqua-pale: #dceee9;
+
+  /* accents */
+  --color-yellow: #e8b93f;
+  --color-coral: #f0876b;
+  --color-pale-green: #7fb885;
+  --color-pink: #e78ba0;
+  --color-blue: #6fa3d8;
+
+  /* text */
+  --text-charcoal: #2b2b28;
+  --text-charcoal-soft: #55534c;
+  --text-muted: #8b8a82;
+  --text-on-teal: #ffffff;
+
+  /* borders / shadow */
+  --border-subtle: #ece7db;
+  --shadow-card: 0 2px 10px rgba(43, 43, 40, 0.06);
+  --shadow-card-hover: 0 6px 18px rgba(43, 43, 40, 0.1);
+  --shadow-sidebar: 1px 0 0 rgba(43, 43, 40, 0.06);
+
+  /* radius */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* layout */
+  --sidebar-width: 252px;
+  --sidebar-rail-width: 84px;
+  --main-max-width: 1080px;
+  --bottom-nav-height: 64px;
+
+  /* breakpoints (reference only, used in media queries directly) */
+  color-scheme: light;
+}
