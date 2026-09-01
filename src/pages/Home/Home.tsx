@@ -8,6 +8,21 @@ import { StrategyTabs } from "../../components/StrategyTabs/StrategyTabs";
 import { useWorkingWeekday } from "../../lib/useWorkingWeekday";
 import { slothHammock } from "../../assets/mascot";
 import { describeLeaveExpiry } from "../../data/companyPolicy";
+import { MascotMessage } from "../../features/highlights/MascotMessage";
+import { TopChances } from "../../features/highlights/TopChances";
+import { VacationRadar } from "../../features/highlights/VacationRadar";
+import {
+  pickTopChances,
+  scoreAllCandidates,
+  describeCandidate,
+  type VacationChance,
+} from "../../features/highlights/vacationRanking";
+import {
+  annotateHighlights,
+  buildMonthlyRadar,
+  type MonthRadar,
+} from "../../features/highlights/monthlyVacationRadar";
+import { moodForScore, pickMascotMessage } from "../../features/highlights/mascotMessages";
 import {
   HolidayDataStatus,
   formatDateRange,
@@ -45,6 +60,7 @@ export function Home() {
     excludedDates,
     excludeDate,
     clearExcludedDates,
+    savedRanges,
     toggleSavedRange,
     isRangeSaved,
     companyPolicy,
@@ -72,11 +88,91 @@ export function Home() {
     [ranges, selectedId],
   );
 
+  /*
+   * TOP3 · 효율점수 · 레이더는 모두 엔진이 이미 만든 후보 풀(rankedCandidates)에서 파생된다.
+   * 휴가 계산을 다시 하지 않으므로 기존 추천 결과와 절대 어긋나지 않는다.
+   */
+  const scoredEntries = useMemo(
+    () => scoreAllCandidates(result.rankedCandidates),
+    [result.rankedCandidates],
+  );
+  const topChances = useMemo(() => pickTopChances(scoredEntries), [scoredEntries]);
+  const radarYear = toCivil(leaveExpiryDate).year;
+  const radar = useMemo(
+    () => annotateHighlights(buildMonthlyRadar(scoredEntries, radarYear)),
+    [scoredEntries, radarYear],
+  );
+
+  const bestScore = topChances[0]?.score.score ?? 0;
+  const mascotText = useMemo(
+    () =>
+      pickMascotMessage({
+        mood: moodForScore(bestScore, topChances.length),
+        seed: `${strategy}:${remainingLeaveDays}:${scoredEntries.length}:${topChances[0]?.candidate.id ?? "none"}`,
+        leaveDays: topChances[0]?.leaveDays,
+        restDays: topChances[0]?.restDays,
+        count: scoredEntries.length,
+      }),
+    [bestScore, topChances, strategy, scoredEntries.length, remainingLeaveDays],
+  );
+
   if (!hasCalculated) return <StartPanel />;
 
   const handleSelect = (range: VacationOverlayRange) => {
     setSelectedId(range.candidateId);
     setStartMonth(startOfMonth(range.startDate));
+  };
+
+  /** TOP3 카드나 레이더에서 고른 날짜로 달력을 이동시킨다. */
+  const focusDate = (date: LocalDate) => {
+    setStartMonth(startOfMonth(date));
+    document.getElementById("vacation-calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const openChance = (chance: VacationChance) => {
+    const matching = ranges.find((range) => range.candidateId === chance.candidate.id);
+    if (matching) setSelectedId(matching.candidateId);
+    focusDate(chance.candidate.startDate);
+  };
+
+  const chanceSaved = (chance: VacationChance) =>
+    savedRanges.some((range) => range.candidateId === chance.candidate.id);
+
+  /** TOP3 카드의 찜하기. 오버레이 형식에 맞춰 최소 정보를 담는다. */
+  const toggleChanceSave = (chance: VacationChance) => {
+    const existing = ranges.find((range) => range.candidateId === chance.candidate.id);
+    if (existing) {
+      toggleSavedRange(existing);
+      return;
+    }
+    const { label, emoji } = describeCandidate(chance.candidate);
+    toggleSavedRange({
+      candidateId: chance.candidate.id,
+      startDate: chance.candidate.startDate,
+      endDate: chance.candidate.endDate,
+      leaveDates: chance.candidate.leaveDates,
+      partialLeaveDates: [],
+      weekendDates: chance.candidate.weekendDates,
+      publicHolidayDates: chance.candidate.publicHolidayDates,
+      substituteHolidayDates: chance.candidate.substituteHolidayDates,
+      companyHolidayDates: chance.candidate.companyHolidayDates,
+      totalRestDays: chance.restDays,
+      totalRestMinutes: chance.candidate.totalRestMinutes,
+      leaveUsedMinutes: chance.candidate.totalLeaveMinutesUsed,
+      leaveUsedDays: chance.leaveDays,
+      efficiency: chance.candidate.efficiencyScore,
+      label,
+      emoji,
+      headline: `연차 ${chance.leaveDays}일 → ${chance.restDays}일 휴식`,
+      description: `${chance.dateRange} · 휴가 효율 ${chance.score.score}점`,
+    });
+  };
+
+  const openMonth = (month: MonthRadar) => {
+    if (!month.best) return;
+    const matching = ranges.find((range) => range.candidateId === month.best?.id);
+    if (matching) setSelectedId(matching.candidateId);
+    focusDate(month.best.startDate);
   };
 
   const expiryYear = toCivil(leaveExpiryDate).year;
@@ -125,7 +221,23 @@ export function Home() {
         </p>
       )}
 
-      <div className={styles.layout}>
+      <MascotMessage text={mascotText} />
+
+      <TopChances
+        chances={topChances}
+        onOpen={openChance}
+        onToggleSave={toggleChanceSave}
+        isSaved={chanceSaved}
+      />
+
+      <VacationRadar
+        radar={radar}
+        year={radarYear}
+        selectedMonth={selected ? toCivil(selected.startDate).month : undefined}
+        onSelectMonth={openMonth}
+      />
+
+      <div className={styles.layout} id="vacation-calendar">
         <div className={styles.calendarCol}>
           <MultiMonthCalendar
             startMonth={startMonth}

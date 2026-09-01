@@ -1,0 +1,341 @@
+/* ── 휴가요정 말풍선 ── */
+.mascotRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.mascotAvatar {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-mint-pill);
+}
+
+.mascotAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mascotBubble {
+  flex: 1;
+  min-width: 0;
+}
+
+.mascotName {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.mascotText {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+  line-height: 1.45;
+}
+
+/* ── TOP 3 ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.sectionSub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 700px) {
+  .topGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  width: 100%;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-teal-light);
+  }
+}
+
+/* TOP1만 살짝 더 강조한다. 과하지 않게 배경 톤과 테두리만. */
+.cardTop {
+  background: linear-gradient(160deg, #eaf6f7 0%, #f6efdd 100%);
+  border-color: var(--color-teal-light);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.medal {
+  font-size: 17px;
+}
+
+.categoryLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-charcoal);
+}
+
+/* 카드에서 가장 큰 숫자: 연차 N일 → M일 휴가 */
+.headline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+/* 숫자와 단위는 붙여 읽히도록 한 덩어리로 묶는다. */
+.headlineResult {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.headlineLeave {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+}
+
+.headlineArrow {
+  font-size: 15px;
+  color: var(--color-teal);
+}
+
+.headlineRest {
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  line-height: 1.05;
+}
+
+.headlineUnit {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.dateRange {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* ── 효율 점수 게이지 ── */
+.scoreRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: 2px;
+}
+
+.scoreValue {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.scoreGrade {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.gauge {
+  display: block;
+  height: 10px;
+  margin: 5px 0 4px;
+  border-radius: 999px;
+  /* 카드 배경(민트/크림 그라데이션) 위에서도 트랙이 보이도록 진하게 깐다. */
+  background: rgba(43, 43, 40, 0.1);
+  overflow: hidden;
+}
+
+.gaugeFill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4fa8ac, #0f6a6e);
+  transition: width 0.4s ease;
+}
+
+.leverage {
+  font-size: 12px;
+  color: var(--text-charcoal-soft);
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.detailBtn,
+.saveBtn {
+  flex: 1;
+  min-height: 40px;
+  padding: 9px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+}
+
+.detailBtn {
+  border-color: var(--color-teal-light);
+  color: var(--color-teal-dark);
+}
+
+.saveBtnActive {
+  background: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+  color: #fff;
+}
+
+/* ── 휴가 레이더 ── */
+.radarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+@media (min-width: 700px) {
+  .radarGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .radarGrid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
+.month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 4px;
+  min-height: 78px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 12px;
+  color: var(--text-charcoal-soft);
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.month:disabled {
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .month:not(:disabled):hover {
+    border-color: var(--color-teal-light);
+    transform: translateY(-1px);
+  }
+}
+
+.monthActive {
+  border-color: var(--color-teal);
+  background: var(--bg-mint-pill);
+}
+
+/* 등급이 높은 달을 강조 */
+.monthHot {
+  background: linear-gradient(165deg, #eaf6f7 0%, #f6efdd 100%);
+  border-color: var(--color-teal-light);
+}
+
+.monthLabel {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.flames {
+  font-size: 11px;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  min-height: 14px;
+}
+
+.monthMeta {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.monthHighlight {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-mint-pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+}
