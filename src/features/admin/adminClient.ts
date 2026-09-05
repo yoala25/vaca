@@ -28,9 +28,14 @@ export const adminSupabase: SupabaseClient | null =
           storageKey: "hyugayojeong-admin-auth",
           persistSession: true,
           autoRefreshToken: true,
-          // 관리자 화면은 OAuth 리디렉션을 쓰지 않는다.
-          // URL 에서 세션을 주워 담지 않게 해 토큰 주입 여지를 없앤다.
-          detectSessionInUrl: false,
+          /*
+           * 구글 로그인을 받으려면 리디렉션으로 돌아온 인가 코드를 읽어야 한다.
+           * 사용자용 클라이언트도 같은 URL 을 보지만, PKCE 는 코드 교환에
+           * "그 흐름을 시작한 클라이언트가 저장한 code_verifier"를 요구한다.
+           * verifier 는 storageKey 별로 따로 저장되므로, 관리자 흐름의 코드는
+           * 관리자 클라이언트만 교환할 수 있다(반대도 마찬가지).
+           */
+          detectSessionInUrl: true,
           flowType: "pkce",
         },
       })

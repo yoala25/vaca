@@ -24,6 +24,8 @@ interface AdminAuthValue {
   /** 로그인했고 role 이 admin 인가 (화면 전환용) */
   isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<string | null>;
+  /** 구글 계정으로 로그인. 돌아온 뒤 role 검사는 동일하게 거친다. */
+  signInWithGoogle: () => Promise<string | null>;
   signOut: () => Promise<void>;
 }
 
@@ -133,6 +135,29 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     [loadRole],
   );
 
+  /**
+   * 구글 로그인.
+   * 리디렉션으로 페이지를 벗어나므로 여기서는 결과를 알 수 없다.
+   * 돌아온 뒤 onAuthStateChange 가 role 을 다시 확인한다.
+   */
+  const signInWithGoogle = useCallback(async (): Promise<string | null> => {
+    if (!adminSupabase) return "서버 연결이 설정되지 않았습니다.";
+    setPending(true);
+    try {
+      const { error } = await adminSupabase.auth.signInWithOAuth({
+        provider: "google",
+        // 해시 라우터를 쓰므로 경로까지만 지정하고, 돌아온 뒤 #/admin 으로 옮긴다.
+        options: { redirectTo: `${window.location.origin}${window.location.pathname}#/admin` },
+      });
+      if (error) return "구글 로그인을 시작하지 못했습니다.";
+      return null;
+    } catch {
+      return "구글 로그인을 시작하지 못했습니다.";
+    } finally {
+      setPending(false);
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     if (!adminSupabase) return;
     setPending(true);
@@ -154,9 +179,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       role,
       isAdmin: role === "admin",
       signIn,
+      signInWithGoogle,
       signOut,
     }),
-    [loading, pending, email, role, signIn, signOut],
+    [loading, pending, email, role, signIn, signInWithGoogle, signOut],
   );
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;
