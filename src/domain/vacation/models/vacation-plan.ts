@@ -69,6 +69,14 @@ export interface VacationOverlayRange {
   totalRestMinutes: number;
   leaveUsedMinutes: number;
   leaveUsedDays: number;
+  /**
+   * 연차가 아니라 별도 부여 휴가(리프레시·안식휴가)로 쓴 일수.
+   * 0보다 크면 이 구간은 연차를 축내지 않는다 — UI가 "연차 10일"이라고
+   * 잘못 표시하지 않도록 구분해서 내려준다.
+   */
+  specialLeaveUsedDays: number;
+  /** 쓴 특별휴가 이름(있을 때만). */
+  specialLeaveName?: string;
   efficiency: number;
   label: string;
   emoji: string;

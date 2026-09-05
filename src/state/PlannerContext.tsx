@@ -27,6 +27,7 @@ import {
   DEFAULT_COMPANY_POLICY,
   resolveLeaveExpiryDate,
   totalLeaveDays,
+  extraLeavesForYear,
   type CompanyPolicy,
 } from "../data/companyPolicy";
 import { getHolidaySet } from "../data/holidayProvider";
@@ -339,9 +340,25 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     [state.companyPolicy, today, selectedYear, isFutureYear],
   );
 
+  /*
+   * 선택 연도에 적용되는 추가 휴가(리프레시휴가 등).
+   * "2027년에만 2주" 같은 일회성 휴가는 그 해를 볼 때만 반영된다.
+   */
+  const extraLeaves = useMemo(
+    () => extraLeavesForYear(state.companyPolicy, selectedYear),
+    [state.companyPolicy, selectedYear],
+  );
+  /** 나눠 쓸 수 있는 추가 휴가는 그냥 연차 예산에 더한다. */
+  const splittableExtraDays = extraLeaves
+    .filter((entry) => !entry.continuous)
+    .reduce((sum, entry) => sum + Math.max(0, entry.days), 0);
+
   const companyRemaining = leaveDaysForYear ?? 0;
   // 직접 찍은 휴가는 이미 쓰기로 한 연차이므로 추천 예산에서 뺀다.
-  const availableLeaveDays = Math.max(0, companyRemaining - state.manualLeaveDates.length);
+  const availableLeaveDays = Math.max(
+    0,
+    companyRemaining + splittableExtraDays - state.manualLeaveDates.length,
+  );
 
   const result = useMemo(() => {
     // 올해는 오늘부터, 미래 연도는 그 해 1월 1일부터 탐색한다.
@@ -362,15 +379,25 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
       recurring: entry.recurring,
     }));
 
+    // 연속으로 써야 하는 휴가만 별도 휴가 종류로 만든다(엔진이 통째 블록으로 배치).
+    const continuousExtras = extraLeaves.filter((entry) => entry.continuous && entry.days > 0);
+
     const leaveCatalog = createDefaultLeaveCatalog({
       annualRemainingMinutes: availableLeaveDays * state.companyPolicy.dailyWorkMinutes,
       annualTotalMinutes:
-        Math.max(totalLeaveDays(state.companyPolicy), companyRemaining) *
+        Math.max(totalLeaveDays(state.companyPolicy, selectedYear), companyRemaining) *
         state.companyPolicy.dailyWorkMinutes,
       halfDayEnabled: state.companyPolicy.halfDayEnabled,
       hourlyUnitMinutes: state.companyPolicy.hourlyUnitMinutes,
       standardDailyWorkMinutes: state.companyPolicy.dailyWorkMinutes,
       validUntil: leaveExpiryDate,
+      extraLeaves: continuousExtras.map((entry) => ({
+        id: `extra-${entry.id}`,
+        name: entry.name,
+        days: entry.days,
+        continuous: true,
+        countsCalendarDays: entry.countsCalendarDays,
+      })),
     });
 
     return engine.optimize({
@@ -380,6 +407,8 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
       companyHolidays,
       leaveCatalog,
       strategy: state.strategy,
+      // 연속 사용 휴가가 있을 때만 특별휴가 탐색을 켠다(없으면 후보 생성 비용 0).
+      includeSpecialLeave: continuousExtras.length > 0,
       // 직접 찍은 날은 추천이 중복해서 쓰지 않도록, 취소한 날은 다시 제안하지 않도록 제외한다.
       preferences: { blockedDates: [...state.manualLeaveDates, ...state.excludedDates] },
     });
@@ -389,6 +418,7 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     leaveExpiryDate,
     availableLeaveDays,
     companyRemaining,
+    extraLeaves,
     state.workPattern,
     state.strategy,
     state.companyPolicy,
@@ -407,7 +437,7 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     onboardingComplete: state.onboardingComplete,
     availableLeaveDays,
     remainingLeaveDays: companyRemaining,
-    totalLeaveDays: Math.max(totalLeaveDays(state.companyPolicy), companyRemaining),
+    totalLeaveDays: Math.max(totalLeaveDays(state.companyPolicy, selectedYear), companyRemaining),
 
     selectedYear,
     currentYear,

@@ -91,6 +91,19 @@ export function createDefaultLeaveCatalog(options: {
    * 반차·시간차는 연차에서 차감되므로 같은 기한을 물려받는다.
    */
   validUntil?: LocalDate;
+  /**
+   * 연차와 별도로 부여받은 휴가(리프레시휴가·안식휴가 등).
+   * continuous 인 항목만 별도 휴가 종류로 만든다 — 통째로 붙여 써야 하므로
+   * 연차와 탐색 방식이 다르기 때문이다. 나눠 쓸 수 있는 항목은 호출부에서
+   * annualRemainingMinutes 에 더해 넘기면 된다.
+   */
+  extraLeaves?: Array<{
+    id: string;
+    name: string;
+    days: number;
+    continuous?: boolean;
+    countsCalendarDays?: boolean;
+  }>;
 }): LeaveType[] {
   const { validUntil } = options;
 
@@ -133,6 +146,29 @@ export function createDefaultLeaveCatalog(options: {
       deductsFromAnnualLeave: true,
       sourceLeaveTypeId: ANNUAL_LEAVE_TYPE_ID,
       canCombineWithAnnualLeave: true,
+      validUntil,
+    });
+  }
+
+  /*
+   * 연속으로 써야 하는 추가 휴가를 특별휴가 종류로 만든다.
+   * 연차에서 차감되지 않고(deductsFromAnnualLeave: false),
+   * 연차와 섞어 쓰지 않는다(canCombineWithAnnualLeave: false) —
+   * 리프레시휴가는 보통 "통째로 연속 사용"이 조건이기 때문이다.
+   */
+  for (const extra of options.extraLeaves ?? []) {
+    if (!extra.continuous || extra.days <= 0) continue;
+    catalog.push({
+      id: extra.id,
+      name: extra.name,
+      category: LeaveCategory.Special,
+      deductsFromAnnualLeave: false,
+      durationBasis: extra.countsCalendarDays
+        ? LeaveDurationBasis.CalendarDay
+        : LeaveDurationBasis.WorkingDay,
+      durationDays: extra.days,
+      mustUseContinuously: true,
+      canCombineWithAnnualLeave: false,
       validUntil,
     });
   }

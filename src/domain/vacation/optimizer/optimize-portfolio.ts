@@ -116,6 +116,102 @@ export function optimizePortfolio(options: OptimizePortfolioOptions): VacationPo
     options.includePartialLeave ?? false,
   );
 
+  const maxPick = Math.max(1, rules.maxSelectedCandidates);
+
+  /*
+   * 특별휴가(리프레시·안식휴가)는 연차와 다른 주머니에서 나온다.
+   * 같은 선택 자리를 놓고 경쟁시키면, 연차 조합이 점수에서 이겨
+   * 별도로 부여받은 휴가가 영영 추천되지 않는다.
+   * 그래서 트랙을 나눠 각각 배치한다.
+   */
+  const specialItems = eligible.filter((item) => item.candidate.specialLeaveMinutesUsed > 0);
+
+  if (specialItems.length === 0) {
+    // 특별휴가가 없으면 예전과 완전히 동일한 경로를 탄다.
+    const selected = solveTrack(
+      eligible,
+      leaveCatalog,
+      annualLeaveRemainingMinutes,
+      maxPick,
+      rules.minGapDaysBetweenCandidates,
+    );
+    if (selected.length === 0) return emptyPortfolio(strategy, annualLeaveRemainingMinutes);
+    return buildPortfolio({
+      strategy,
+      selected,
+      leaveCatalog,
+      annualLeaveRemainingMinutes,
+      standardDailyWorkMinutes,
+    });
+  }
+
+  /*
+   * ① 특별휴가를 먼저 배치한다.
+   *    쓰지 않으면 소멸하는 별도 부여 휴가라 "쓸지 말지"가 아니라
+   *    "언제 쓸지"의 문제이기 때문이다.
+   *    휴가 종류마다 한 번씩만 고른다(리프레시휴가를 두 번 쓸 수는 없다).
+   */
+  const specialTypeIds = new Set(
+    specialItems.flatMap((item) =>
+      item.candidate.leaveUsages
+        .filter((usage) => !findLeaveType(leaveCatalog, usage.leaveTypeId)?.deductsFromAnnualLeave)
+        .map((usage) => usage.leaveTypeId),
+    ),
+  );
+  const specialSelected = solveTrack(
+    specialItems,
+    leaveCatalog,
+    // 특별휴가는 연차를 쓰지 않으므로 연차 예산과 무관하게 배치한다.
+    Math.max(annualLeaveRemainingMinutes, standardDailyWorkMinutes),
+    Math.max(1, specialTypeIds.size),
+    rules.minGapDaysBetweenCandidates,
+  );
+
+  /*
+   * ② 남은 연차는 특별휴가 일정을 피해서 배치한다.
+   *    같은 날을 두 번 쉴 수는 없으므로 겹치는 후보는 제외한다.
+   */
+  const annualItems = eligible.filter(
+    (item) =>
+      item.candidate.specialLeaveMinutesUsed === 0 &&
+      !specialSelected.some((picked) => overlaps(picked.candidate, item.candidate)),
+  );
+  const annualSelected = solveTrack(
+    annualItems,
+    leaveCatalog,
+    annualLeaveRemainingMinutes,
+    maxPick,
+    rules.minGapDaysBetweenCandidates,
+  );
+
+  const merged = [...specialSelected, ...annualSelected];
+  if (merged.length === 0) return emptyPortfolio(strategy, annualLeaveRemainingMinutes);
+
+  return buildPortfolio({
+    strategy,
+    selected: merged,
+    leaveCatalog,
+    annualLeaveRemainingMinutes,
+    standardDailyWorkMinutes,
+  });
+}
+
+/** 두 휴가 구간이 하루라도 겹치는가. */
+function overlaps(a: VacationCandidate, b: VacationCandidate): boolean {
+  return a.startDate <= b.endDate && b.startDate <= a.endDate;
+}
+
+/**
+ * 예산·중복·개수 제약을 지키면서 총점을 최대화하는 조합을 DP로 찾는다.
+ * 트랙(연차/특별휴가)마다 따로 호출된다.
+ */
+function solveTrack(
+  eligible: ScoredCandidate[],
+  leaveCatalog: LeaveType[],
+  annualLeaveRemainingMinutes: number,
+  maxPick: number,
+  minGapDays: number,
+): ScoredCandidate[] {
   // DP는 종료일 오름차순 정렬을 전제로 한다.
   const items = [...eligible].sort((a, b) => {
     const byEnd = a.candidate.endDate.localeCompare(b.candidate.endDate);
@@ -128,16 +224,12 @@ export function optimizePortfolio(options: OptimizePortfolioOptions): VacationPo
   const costCells = costs.map((cost) => Math.ceil(cost / unit));
 
   const n = items.length;
-  const maxPick = Math.max(1, rules.maxSelectedCandidates);
-
-  if (n === 0 || budgetCells <= 0) {
-    return emptyPortfolio(strategy, annualLeaveRemainingMinutes);
-  }
+  if (n === 0 || budgetCells <= 0) return [];
 
   // p[i] (1-based): i번째 후보와 양립 가능한 마지막 후보 개수
   const compatibleUpTo = new Array<number>(n + 1).fill(0);
   for (let i = 1; i <= n; i++) {
-    compatibleUpTo[i] = findLastCompatible(items, i - 1, rules.minGapDaysBetweenCandidates);
+    compatibleUpTo[i] = findLastCompatible(items, i - 1, minGapDays);
   }
 
   const budgetSpan = budgetCells + 1;
@@ -163,23 +255,7 @@ export function optimizePortfolio(options: OptimizePortfolioOptions): VacationPo
     }
   }
 
-  const selected = backtrack({
-    dp,
-    at,
-    items,
-    costCells,
-    compatibleUpTo,
-    budgetCells,
-    maxPick,
-  });
-
-  return buildPortfolio({
-    strategy,
-    selected,
-    leaveCatalog,
-    annualLeaveRemainingMinutes,
-    standardDailyWorkMinutes,
-  });
+  return backtrack({ dp, at, items, costCells, compatibleUpTo, budgetCells, maxPick });
 }
 
 /** 종료일 오름차순 배열에서 후보 i와 양립 가능한 마지막 후보의 개수를 이분탐색한다. */

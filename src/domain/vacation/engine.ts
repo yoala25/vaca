@@ -131,6 +131,7 @@ export function createVacationEngine(options: VacationEngineOptions = {}) {
     });
 
     const calendarOverlay = generateCalendarOverlay({
+      leaveCatalog: input.leaveCatalog,
       portfolio,
       holidayNamesByDate: pool.holidayNamesByDate,
       standardDailyWorkMinutes: pool.index.standardDailyWorkMinutes,

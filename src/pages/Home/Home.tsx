@@ -215,6 +215,7 @@ export function Home() {
       totalRestMinutes: chance.candidate.totalRestMinutes,
       leaveUsedMinutes: chance.candidate.totalLeaveMinutesUsed,
       leaveUsedDays: chance.leaveDays,
+      specialLeaveUsedDays: 0,
       efficiency: chance.candidate.efficiencyScore,
       label,
       emoji,
@@ -467,8 +468,11 @@ export function Home() {
                     <span className={styles.blockBody}>
                       <span className={styles.blockLabel}>{range.label}</span>
                       <span className={styles.blockMeta}>
-                        {formatDateRange(range.startDate, range.endDate)} · 연차{" "}
-                        {range.leaveUsedDays}일
+                        {formatDateRange(range.startDate, range.endDate)} ·{" "}
+                        {/* 리프레시휴가는 연차를 쓰지 않으므로 이름을 그대로 보여준다. */}
+                        {range.specialLeaveUsedDays > 0
+                          ? `${range.specialLeaveName ?? "특별휴가"} ${range.specialLeaveUsedDays}일`
+                          : `연차 ${range.leaveUsedDays}일`}
                       </span>
                     </span>
                     <span className={styles.blockRest}>{range.totalRestDays}일</span>

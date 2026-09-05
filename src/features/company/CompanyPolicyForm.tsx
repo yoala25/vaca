@@ -7,6 +7,7 @@ import {
   LEAVE_EXPIRY_PRESETS,
   describeLeaveExpiry,
   totalLeaveDays,
+  extraLeavesForYear,
   type CompanyHolidayEntry,
   type CompanyPolicy,
   type ExtraLeaveEntry,
@@ -23,7 +24,8 @@ const EXTRA_LEAVE_PRESETS = ["리프레시휴가", "안식휴가", "장기근속
 
 export function CompanyPolicyForm() {
   const navigate = useNavigate();
-  const { companyPolicy, updateCompanyPolicy, today } = usePlanner();
+  const { companyPolicy, updateCompanyPolicy, today, availableYears, selectedYear } =
+    usePlanner();
 
   // 저장 버튼을 누를 때까지 홈 화면에 반영되지 않도록 초안 상태로 편집한다.
   const [draft, setDraft] = useState<CompanyPolicy>(companyPolicy);
@@ -36,7 +38,11 @@ export function CompanyPolicyForm() {
   const [holidayEnd, setHolidayEnd] = useState("");
 
   const [extraName, setExtraName] = useState(EXTRA_LEAVE_PRESETS[0]);
-  const [extraDays, setExtraDays] = useState("15");
+  const [extraDays, setExtraDays] = useState("10");
+  /** "" = 매년 반복, 그 외에는 그 연도에만 주어지는 일회성 휴가. */
+  const [extraYear, setExtraYear] = useState<string>("");
+  /** 리프레시휴가는 보통 통째로 붙여 써야 하므로 기본값을 연속으로 둔다. */
+  const [extraContinuous, setExtraContinuous] = useState(true);
 
   useEffect(() => setDraft(companyPolicy), [companyPolicy]);
 
@@ -63,6 +69,9 @@ export function CompanyPolicyForm() {
       id: `extra-${Date.now()}`,
       name,
       days,
+      // 빈 값이면 매년 반복. 연도를 고르면 그 해에만 적용된다.
+      ...(extraYear ? { year: Number(extraYear) } : {}),
+      ...(extraContinuous ? { continuous: true } : {}),
     };
     patch({ extraLeaves: [...draft.extraLeaves, entry] });
     setExtraDays("15");
@@ -127,7 +136,17 @@ export function CompanyPolicyForm() {
           {draft.extraLeaves.map((entry) => (
             <div key={entry.id} className={styles.row}>
               <span className={styles.rowIcon}>🎁</span>
-              <span className={styles.rowLabel}>{entry.name}</span>
+              <span className={styles.rowLabel}>
+                {entry.name}
+                <span className={styles.extraTags}>
+                  <span
+                    className={`${styles.extraTag} ${entry.year ? styles.extraTagYear : ""}`}
+                  >
+                    {entry.year ? `${entry.year}년만` : "매년"}
+                  </span>
+                  {entry.continuous && <span className={styles.extraTag}>연속 사용</span>}
+                </span>
+              </span>
               <span className={styles.rowValue}>+{entry.days}일</span>
               <button
                 type="button"
@@ -165,17 +184,47 @@ export function CompanyPolicyForm() {
               onChange={(event) => setExtraDays(event.target.value)}
               aria-label="추가 휴가 일수"
             />
+            <select
+              className={styles.addInput}
+              value={extraYear}
+              onChange={(event) => setExtraYear(event.target.value)}
+              aria-label="적용 연도"
+            >
+              <option value="">매년</option>
+              {availableYears.map((year) => (
+                <option key={year} value={year}>
+                  {year}년만
+                </option>
+              ))}
+            </select>
             <button type="button" className={styles.addConfirm} onClick={addExtraLeave}>
               추가
             </button>
           </div>
 
+          <label className={styles.extraOption}>
+            <input
+              type="checkbox"
+              checked={extraContinuous}
+              onChange={(event) => setExtraContinuous(event.target.checked)}
+            />
+            <span>
+              연속으로 몰아서 써야 하는 휴가예요
+              <span className={styles.extraOptionHint}>
+                켜두면 근무일 {extraDays || "0"}일을 통째로 붙인 일정을 따로 찾아드려요. 끄면
+                연차처럼 나눠 쓸 수 있는 일수로 더해집니다.
+              </span>
+            </span>
+          </label>
+
           <p className={styles.totalRow}>
-            전체 휴가 <strong>{totalLeaveDays(draft)}일</strong>
-            {draft.extraLeaves.length > 0 && (
+            {selectedYear}년 전체 휴가 <strong>{totalLeaveDays(draft, selectedYear)}일</strong>
+            {extraLeavesForYear(draft, selectedYear).length > 0 && (
               <span className={styles.totalBreakdown}>
                 (기본 {draft.baseLeaveDays}일 +{" "}
-                {draft.extraLeaves.map((e) => `${e.name} ${e.days}일`).join(" + ")})
+                {extraLeavesForYear(draft, selectedYear)
+                  .map((e) => `${e.name} ${e.days}일`)
+                  .join(" + ")})
               </span>
             )}
           </p>

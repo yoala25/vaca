@@ -1,4 +1,4 @@
-import { LeaveSlot } from "../models/leave-type";
+import { LeaveCategory, LeaveSlot, type LeaveType } from "../models/leave-type";
 import type { LocalDate } from "../models/local-date";
 import type { VacationCandidate } from "../models/vacation-candidate";
 import type {
@@ -17,6 +17,8 @@ export interface OverlayOptions {
   portfolio: VacationPortfolio;
   holidayNamesByDate: Map<LocalDate, string>;
   standardDailyWorkMinutes: number;
+  /** 휴가 이름을 표시하기 위해 필요하다(리프레시휴가 등). */
+  leaveCatalog: LeaveType[];
 }
 
 type PartialPeriod = "AM" | "PM" | "START" | "END";
@@ -45,6 +47,20 @@ export function generateCalendarOverlay(options: OverlayOptions): CalendarOverla
     toOverlayRange(candidate, options),
   );
   return { strategy: options.portfolio.strategy, ranges };
+}
+
+/** 이 구간에서 쓴 특별휴가의 이름. 연차만 썼으면 undefined. */
+function specialLeaveNameOf(
+  candidate: VacationCandidate,
+  leaveCatalog: LeaveType[],
+): string | undefined {
+  if (candidate.specialLeaveMinutesUsed <= 0) return undefined;
+  for (const usage of candidate.leaveUsages) {
+    if (usage.category === LeaveCategory.Special || usage.category === LeaveCategory.Sabbatical) {
+      return leaveCatalog.find((type) => type.id === usage.leaveTypeId)?.name;
+    }
+  }
+  return undefined;
 }
 
 function toOverlayRange(
@@ -79,6 +95,9 @@ function toOverlayRange(
     totalRestMinutes: candidate.totalRestMinutes,
     leaveUsedMinutes: candidate.totalLeaveMinutesUsed,
     leaveUsedDays: Math.round(candidate.annualLeaveEquivalentDays * 10) / 10,
+    specialLeaveUsedDays:
+      Math.round((candidate.specialLeaveMinutesUsed / options.standardDailyWorkMinutes) * 10) / 10,
+    specialLeaveName: specialLeaveNameOf(candidate, options.leaveCatalog),
     // 표시용 값은 소수점 한 자리로 통일한다(2.4x / 4.2x 처럼 읽히도록).
     efficiency: Math.round(candidate.efficiencyScore * 10) / 10,
     label,

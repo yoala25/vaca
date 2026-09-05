@@ -23,6 +23,11 @@ function formatLeaveDays(days: number): string {
 
 /** "연차 2일 → 9일 휴식" 같은 한 줄 요약. */
 export function generateHeadline(candidate: VacationCandidate): string {
+  // 리프레시·안식휴가는 연차를 쓰지 않는다. "연차 10일"이라고 하면 거짓말이 된다.
+  if (candidate.specialLeaveMinutesUsed > 0 && candidate.annualLeaveEquivalentDays <= 0) {
+    const specialDays = candidate.leaveUsages.length;
+    return `특별휴가 ${specialDays}일 → ${candidate.consecutiveFullRestDays}일 휴식`;
+  }
   const leaveDays = formatLeaveDays(candidate.annualLeaveEquivalentDays);
   return `연차 ${leaveDays} → ${candidate.consecutiveFullRestDays}일 휴식`;
 }

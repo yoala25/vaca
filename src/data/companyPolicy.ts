@@ -17,6 +17,31 @@ export interface ExtraLeaveEntry {
   id: string;
   name: string;
   days: number;
+  /**
+   * 이 휴가가 적용되는 연도.
+   * undefined 면 매년 반복(기존 데이터 호환 — 예전 항목은 전부 매년으로 읽힌다).
+   * 특정 연도만 주어지는 일회성 휴가는 그 연도를 넣는다
+   * (예: 2027년 근속 10년 리프레시휴가).
+   */
+  year?: number;
+  /**
+   * 연속으로 몰아서 써야 하는 휴가인지.
+   * true 면 엔진이 "통째로 붙여 쓰는" 후보를 따로 만들어 준다(리프레시·안식휴가).
+   * false 면 그냥 쓸 수 있는 일수가 늘어난 것으로 본다.
+   */
+  continuous?: boolean;
+  /**
+   * 일수를 세는 기준. 기본은 근무일.
+   * "2주"짜리 리프레시휴가는 보통 근무일 10일을 뜻하고, 주말은 그 위에 얹힌다.
+   */
+  countsCalendarDays?: boolean;
+}
+
+/** 해당 연도에 적용되는 추가 휴가만 고른다. year 가 없는 항목은 매년 적용된다. */
+export function extraLeavesForYear(policy: CompanyPolicy, year?: number): ExtraLeaveEntry[] {
+  return policy.extraLeaves.filter(
+    (entry) => entry.year === undefined || year === undefined || entry.year === year,
+  );
 }
 
 /** 연차 소멸(정산) 기준. 회사마다 다르다. */
@@ -71,10 +96,21 @@ export const DEFAULT_COMPANY_POLICY: CompanyPolicy = {
   leaveExpiryCustomDate: null,
 };
 
-/** 기본 연차 + 추가 휴가를 합친 올해 전체 휴가일수. */
-export function totalLeaveDays(policy: CompanyPolicy): number {
-  const extras = policy.extraLeaves.reduce((sum, entry) => sum + Math.max(0, entry.days), 0);
+/**
+ * 기본 연차 + 그 연도에 적용되는 추가 휴가를 합친 전체 휴가일수.
+ * year 를 주지 않으면 매년 적용되는 항목만 더한다.
+ */
+export function totalLeaveDays(policy: CompanyPolicy, year?: number): number {
+  const extras = extraLeavesForYear(policy, year).reduce(
+    (sum, entry) => sum + Math.max(0, entry.days),
+    0,
+  );
   return Math.round((Math.max(0, policy.baseLeaveDays) + extras) * 2) / 2;
+}
+
+/** 그 연도에만 주어지는 일회성 휴가(연도가 명시된 항목). */
+export function oneTimeExtraLeaves(policy: CompanyPolicy, year: number): ExtraLeaveEntry[] {
+  return policy.extraLeaves.filter((entry) => entry.year === year);
 }
 
 export function remainingLeaveDays(policy: CompanyPolicy): number {
