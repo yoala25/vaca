@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { useViewport } from "../lib/useViewport";
@@ -29,9 +29,25 @@ function MobileOnly({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+/*
+ * 관리자 화면은 따로 떼어 지연 로딩한다.
+ * 일반 사용자는 관리자 코드를 한 바이트도 내려받지 않으므로
+ * 기존 첫 화면 속도가 그대로 유지된다.
+ */
+const AdminApp = lazy(() =>
+  import("../features/admin/AdminApp").then((module) => ({ default: module.AdminApp })),
+);
+
 export function AppRoutes() {
   return (
     <Routes>
+      {/*
+        관리자 화면은 AppShell 바깥에 둔다.
+        사이드바·하단탭·PlannerContext 등 사용자 화면의 구성 요소를
+        전혀 거치지 않으므로, 양쪽이 서로에게 영향을 주지 않는다.
+      */}
+      <Route path="/admin/*" element={<Suspense fallback={null}><AdminApp /></Suspense>} />
+
       <Route element={<AppShell />}>
         <Route path="/" element={<HomeGate />} />
         <Route path="/calendar" element={<YearCalendarPage />} />

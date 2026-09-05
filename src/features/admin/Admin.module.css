@@ -1,0 +1,356 @@
+/*
+ * 관리자 화면 전용 토큰과 레이아웃.
+ *
+ * 사용자 화면(--bg-page 크림색, 둥근 파스텔 카드)과 브랜드 연결감은 유지하되,
+ * 숫자를 오래 들여다보는 화면이므로 배경을 한 단계 차분하게 낮추고
+ * 색은 데이터에만 쓴다. 나무늘보 캐릭터는 헤더에 포인트로만 등장한다.
+ *
+ * 이 파일의 토큰은 .admin 스코프 안에서만 유효하므로
+ * 기존 사용자 화면의 토큰을 절대 덮어쓰지 않는다.
+ */
+
+.admin {
+  /* 표면 */
+  --a-bg: #f6f6f3;
+  --a-surface: #ffffff;
+  --a-surface-2: #fbfbf9;
+  --a-sidebar: #14201f;
+  --a-sidebar-hover: #1e2e2c;
+  --a-sidebar-active: #0f6a6e;
+
+  /* 잉크 */
+  --a-ink: #16211f;
+  --a-ink-2: #55635f;
+  --a-ink-3: #8a9793;
+  --a-sidebar-ink: #cfdcd9;
+  --a-sidebar-ink-2: #7f918d;
+
+  /* 선 */
+  --a-line: #e4e6e1;
+  --a-line-strong: #d2d6d0;
+
+  /* 브랜드(사용자 화면과 동일) */
+  --a-brand: #0f6a6e;
+  --a-brand-soft: #eff8fa;
+
+  /* 데이터 시리즈 — 검증된 팔레트(라이트 모드) */
+  --a-s1: #2a78d6;
+  --a-s2: #eb6834;
+  --a-s3: #1baf7a;
+  --a-s4: #eda100;
+  --a-good: #1baf7a;
+  --a-warn: #eda100;
+  --a-bad: #e34948;
+  --a-grid: #e9ebe7;
+
+  --a-radius: 14px;
+  --a-shadow: 0 1px 2px rgba(22, 33, 31, 0.05), 0 4px 14px rgba(22, 33, 31, 0.04);
+
+  min-height: 100vh;
+  background: var(--a-bg);
+  color: var(--a-ink);
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  /* 숫자가 자릿수마다 흔들리지 않게 한다. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* 다크 모드는 관리자 화면에서도 읽히도록 별도로 고른 값이다(자동 반전이 아니다). */
+@media (prefers-color-scheme: dark) {
+  .admin {
+    --a-bg: #12130f;
+    --a-surface: #1a1a19;
+    --a-surface-2: #212120;
+    --a-ink: #f2f2ee;
+    --a-ink-2: #c3c2b7;
+    --a-ink-3: #8d8d84;
+    --a-line: #2e2e2b;
+    --a-line-strong: #3d3d39;
+    --a-brand-soft: #16302f;
+    --a-s1: #3987e5;
+    --a-s2: #d95926;
+    --a-s3: #199e70;
+    --a-s4: #c98500;
+    --a-good: #199e70;
+    --a-warn: #c98500;
+    --a-bad: #e66767;
+    --a-grid: #2b2b28;
+    --a-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* ── 레이아웃 ───────────────────────────────────────────────────────────── */
+
+.shell {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--a-sidebar);
+  color: var(--a-sidebar-ink);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 18px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brandMascot {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.brandTitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.brandSub {
+  font-size: 11px;
+  color: var(--a-sidebar-ink-2);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  color: var(--a-sidebar-ink);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.navLink:hover {
+  background: var(--a-sidebar-hover);
+  color: #ffffff;
+}
+
+.navLinkActive {
+  background: var(--a-sidebar-active);
+  color: #ffffff;
+}
+
+.navIcon {
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.sidebarFoot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adminEmail {
+  font-size: 11.5px;
+  color: var(--a-sidebar-ink-2);
+  padding: 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.signOutBtn {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--a-sidebar-ink);
+  border: none;
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.signOutBtn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+}
+
+.main {
+  min-width: 0;
+  padding: 22px 26px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── 상단 바 (기간 필터) ────────────────────────────────────────────────── */
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.pageDesc {
+  font-size: 13px;
+  color: var(--a-ink-2);
+  margin: 3px 0 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.periodRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.periodBtn {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  color: var(--a-ink-2);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.periodBtn:hover {
+  border-color: var(--a-line-strong);
+  color: var(--a-ink);
+}
+
+.periodBtnActive {
+  background: var(--a-brand);
+  border-color: var(--a-brand);
+  color: #ffffff;
+}
+
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--a-ink-2);
+}
+
+.dateInput {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: var(--a-ink);
+}
+
+.refreshBtn {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  color: var(--a-ink-2);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.refreshBtn:hover {
+  color: var(--a-ink);
+}
+
+/* ── 모바일 ─────────────────────────────────────────────────────────────── */
+
+.menuBtn {
+  display: none;
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: 9px;
+  width: 38px;
+  height: 38px;
+  font-size: 17px;
+  cursor: pointer;
+  color: var(--a-ink);
+  flex-shrink: 0;
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .menuBtn {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 250px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 15, 14, 0.45);
+    z-index: 40;
+    border: none;
+    padding: 0;
+  }
+
+  .main {
+    padding: 16px 14px 48px;
+  }
+
+  .pageTitle {
+    font-size: 18px;
+  }
+}

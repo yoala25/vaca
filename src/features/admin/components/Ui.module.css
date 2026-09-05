@@ -1,0 +1,534 @@
+/* 관리자 화면의 공통 조각: 카드 · KPI · 표 · 차트 껍데기 · 상태 표시 */
+
+/* ── 카드 ───────────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: var(--a-radius);
+  box-shadow: var(--a-shadow);
+  padding: 18px 20px;
+  min-width: 0;
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--a-ink);
+}
+
+.cardSub {
+  font-size: 12px;
+  color: var(--a-ink-3);
+}
+
+.cardActions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.ghostBtn {
+  background: transparent;
+  border: 1px solid var(--a-line);
+  color: var(--a-ink-2);
+  border-radius: 7px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.ghostBtn:hover {
+  color: var(--a-ink);
+  border-color: var(--a-line-strong);
+}
+
+.ghostBtnActive {
+  background: var(--a-brand-soft);
+  border-color: var(--a-brand);
+  color: var(--a-brand);
+}
+
+/* ── 그리드 ─────────────────────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.kpiGrid {
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+}
+
+.cols2 {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.cols3 {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* ── KPI 카드 ───────────────────────────────────────────────────────────── */
+
+.kpi {
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: var(--a-radius);
+  box-shadow: var(--a-shadow);
+  padding: 15px 17px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.kpiLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--a-ink-2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.kpiValue {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  color: var(--a-ink);
+}
+
+.kpiValueAccent {
+  color: var(--a-brand);
+}
+
+.kpiHint {
+  font-size: 11.5px;
+  color: var(--a-ink-3);
+}
+
+/* ── 표 ─────────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--a-ink-3);
+  padding: 0 10px 8px;
+  border-bottom: 1px solid var(--a-line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--a-line);
+  color: var(--a-ink);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.numCell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pathCell {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.rankCell {
+  color: var(--a-ink-3);
+  width: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 상태(로딩·오류·빈 데이터) ─────────────────────────────────────────── */
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 34px 18px;
+  text-align: center;
+  color: var(--a-ink-3);
+  font-size: 13px;
+}
+
+.stateIcon {
+  font-size: 26px;
+  opacity: 0.7;
+}
+
+.stateTitle {
+  font-weight: 700;
+  color: var(--a-ink-2);
+}
+
+.stateHint {
+  font-size: 12px;
+  max-width: 380px;
+  line-height: 1.55;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--a-surface-2) 25%, var(--a-line) 50%, var(--a-surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+  border-radius: 8px;
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* ── 차트 공통 ──────────────────────────────────────────────────────────── */
+
+.chartBox {
+  position: relative;
+  width: 100%;
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* 범례는 2개 이상 시리즈에서 항상 보인다(색만으로 구분하지 않기 위해). */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--a-ink-2);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.legendItemMuted {
+  opacity: 0.4;
+}
+
+.legendSwatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* 툴팁 */
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--a-ink);
+  color: var(--a-surface);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+  z-index: 5;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  transform: translate(-50%, -100%);
+}
+
+.tooltipTitle {
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tooltipVal {
+  margin-left: auto;
+  font-weight: 700;
+  padding-left: 10px;
+}
+
+/* ── 가로 막대(순위형) ─────────────────────────────────────────────────── */
+
+.barList {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.barLabel {
+  color: var(--a-ink-2);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barTrack {
+  background: var(--a-grid);
+  border-radius: 4px;
+  height: 9px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 3px;
+}
+
+.barValue {
+  font-weight: 700;
+  color: var(--a-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.barPercent {
+  color: var(--a-ink-3);
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+/* ── 퍼널 ───────────────────────────────────────────────────────────────── */
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.funnelStep {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.funnelName {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--a-ink-2);
+  text-align: right;
+}
+
+.funnelBarWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.funnelBar {
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 11px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 46px;
+  box-sizing: border-box;
+}
+
+.funnelMeta {
+  font-size: 12px;
+  color: var(--a-ink-2);
+  white-space: nowrap;
+}
+
+.funnelDropText {
+  color: var(--a-bad);
+  font-weight: 700;
+}
+
+/* 단계 사이의 이탈 표시 */
+.funnelGap {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  height: 18px;
+  align-items: center;
+}
+
+.funnelGapText {
+  font-size: 11px;
+  color: var(--a-ink-3);
+  padding-left: 11px;
+}
+
+/* ── 알림/배너 ──────────────────────────────────────────────────────────── */
+
+.banner {
+  border-radius: var(--a-radius);
+  padding: 13px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  border: 1px solid;
+}
+
+.bannerInfo {
+  background: var(--a-brand-soft);
+  border-color: color-mix(in srgb, var(--a-brand) 25%, transparent);
+  color: var(--a-ink);
+}
+
+.bannerWarn {
+  background: color-mix(in srgb, var(--a-warn) 12%, var(--a-surface));
+  border-color: color-mix(in srgb, var(--a-warn) 35%, transparent);
+  color: var(--a-ink);
+}
+
+.bannerCode {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+/* ── 외부 링크 카드 (SEO 바로가기) ─────────────────────────────────────── */
+
+.linkCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--a-surface);
+  border: 1px solid var(--a-line);
+  border-radius: var(--a-radius);
+  padding: 15px 17px;
+  text-decoration: none;
+  color: var(--a-ink);
+  box-shadow: var(--a-shadow);
+  transition: border-color 0.14s ease, transform 0.14s ease;
+}
+
+.linkCard:hover {
+  border-color: var(--a-brand);
+  transform: translateY(-1px);
+}
+
+.linkIcon {
+  font-size: 22px;
+}
+
+.linkBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.linkTitle {
+  font-size: 13.5px;
+  font-weight: 800;
+}
+
+.linkDesc {
+  font-size: 11.5px;
+  color: var(--a-ink-3);
+}
+
+.linkArrow {
+  margin-left: auto;
+  color: var(--a-ink-3);
+}
+
+/* ── 상태 점 ────────────────────────────────────────────────────────────── */
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dotOk {
+  background: var(--a-good);
+}
+
+.dotOff {
+  background: var(--a-ink-3);
+}
+
+.liveTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--a-good);
+}
