@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MascotBubble, UserBubble } from "../ChatBubble";
 import styles from "./LeaveStep.module.css";
+import { sanitizeLeaveDays } from "../../../lib/validation";
 
 const LEAVE_QUICK_OPTIONS = [3, 5, 7, 10];
 
@@ -68,8 +69,8 @@ export function LeaveStep({ answered, onSelect }: LeaveStepProps) {
             type="button"
             className={styles.customConfirm}
             onClick={() => {
-              const parsed = Number(customValue);
-              if (!Number.isNaN(parsed) && parsed > 0) onSelect(parsed);
+              const parsed = sanitizeLeaveDays(customValue, 0);
+              if (parsed > 0) onSelect(parsed);
             }}
           >
             확인

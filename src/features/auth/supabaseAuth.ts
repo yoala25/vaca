@@ -24,7 +24,11 @@ export function toAuthUser(user: User): AuthUser {
   };
 }
 
-/** Supabase 오류 메시지를 사용자에게 보여줄 한국어로 바꾼다. */
+/**
+ * Supabase 오류 메시지를 사용자에게 보여줄 한국어로 바꾼다.
+ * 아는 경우만 안내하고, 모르는 오류는 원문을 그대로 보여주지 않는다.
+ * (원문에는 테이블명·제약조건·내부 코드가 섞여 나올 수 있다.)
+ */
 function translateError(message: string): string {
   const lower = message.toLowerCase();
   if (lower.includes("invalid login credentials")) {
@@ -48,7 +52,9 @@ function translateError(message: string): string {
   if (lower.includes("rate limit") || lower.includes("too many")) {
     return "잠시 후 다시 시도해 주세요.";
   }
-  return message;
+  // 원문은 개발 중에만 콘솔로 남기고, 화면에는 일반적인 안내만 보여준다.
+  if (import.meta.env.DEV) console.warn("[auth]", message);
+  return "잠시 문제가 생겼어요. 다시 시도해 주세요.";
 }
 
 export async function signUpWithEmail(

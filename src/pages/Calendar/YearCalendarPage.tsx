@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import pageStyles from "../../styles/pageHeader.module.css";
 import styles from "./YearCalendarPage.module.css";
@@ -25,10 +25,15 @@ export function YearCalendarPage() {
     toggleManualLeaveDate,
     excludeDate,
     companyPolicy,
+    selectedYear,
+    currentYear,
+    isFutureYear,
   } = usePlanner();
 
   const isWorkingWeekday = useWorkingWeekday();
-  const [year, setYear] = useState(() => toCivil(today).year);
+  // 홈에서 보던 연도를 그대로 이어받는다(2027년을 보다가 전체보기를 눌렀는데 2026이 뜨면 안 된다).
+  const [year, setYear] = useState(selectedYear);
+  useEffect(() => setYear(selectedYear), [selectedYear]);
   const ranges = result.calendarOverlay.ranges;
 
   const yearRanges = useMemo(
@@ -41,13 +46,17 @@ export function YearCalendarPage() {
   );
 
   const expiryYear = toCivil(leaveExpiryDate).year;
+  // 추천은 선택 연도 안에서만 계산되므로 그 밖으로는 넘어가지 않게 한다.
+  const minYear = Math.min(selectedYear, currentYear);
 
   return (
     <div className={pageStyles.page}>
       <div>
         <h1 className={pageStyles.title}>전체 캘린더</h1>
         <p className={pageStyles.desc}>
-          {describeLeaveExpiry(companyPolicy, today)}까지의 휴가 배치를 1년 단위로 확인하세요.
+          {isFutureYear
+            ? `${selectedYear}년 휴가 배치를 미리 확인하세요.`
+            : `${describeLeaveExpiry(companyPolicy, today)}까지의 휴가 배치를 1년 단위로 확인하세요.`}
         </p>
       </div>
 
@@ -57,8 +66,9 @@ export function YearCalendarPage() {
         <button
           type="button"
           className={styles.yearNavBtn}
-          onClick={() => setYear((value) => value - 1)}
+          onClick={() => setYear((value) => Math.max(minYear, value - 1))}
           aria-label="이전 해"
+          disabled={year <= minYear}
         >
           ‹
         </button>
@@ -66,7 +76,7 @@ export function YearCalendarPage() {
         <button
           type="button"
           className={styles.yearNavBtn}
-          onClick={() => setYear((value) => value + 1)}
+          onClick={() => setYear((value) => Math.min(expiryYear, value + 1))}
           aria-label="다음 해"
           disabled={year >= expiryYear}
         >

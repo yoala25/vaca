@@ -4,7 +4,16 @@
  * (렌더링할 때마다 문구가 바뀌면 산만하므로 무작위 대신 결과 기반 해시를 쓴다).
  */
 
-export type MascotMood = "searching" | "found" | "great" | "weak" | "empty";
+export type MascotMood =
+  | "searching"
+  | "found"
+  | "great"
+  | "weak"
+  | "empty"
+  /** 미래 연도를 미리 시뮬레이션할 때 */
+  | "futureGreat"
+  | "futureFound"
+  | "futureEmpty";
 
 const MESSAGES: Record<MascotMood, string[]> = {
   searching: [
@@ -36,6 +45,23 @@ const MESSAGES: Record<MascotMood, string[]> = {
     "남은 연차를 늘리거나 소멸일을 확인해 주세요.",
     "연차가 1일 이상 있어야 계산할 수 있어요!",
   ],
+  futureGreat: [
+    "{year}년에 이런 황금연휴가 숨어 있었어요! ✨",
+    "미리 봤더니 연차 {leave}일로 {rest}일이나 쉴 수 있어요 🎉",
+    "{year}년 최고의 기회, 지금 찜해두면 마음이 편해요 😎",
+    "벌써 {year}년 여행 계획이 그려지지 않나요? 🧳",
+  ],
+  futureFound: [
+    "{year}년 휴가를 미리 짜볼까요?",
+    "휴가요정이 {year}년 연휴를 미리 찾아드릴게요 ✨",
+    "{year}년 연차, 어디에 쓰면 가장 이득일까요?",
+    "미리 본 {year}년, 쉴 자리가 {count}군데 있어요 🌴",
+  ],
+  futureEmpty: [
+    "{year}년 예상 연차를 조금만 더 넣어볼까요?",
+    "연차가 1일 이상 있어야 {year}년을 그려볼 수 있어요!",
+    "{year}년은 아직 비어 있어요. 예상 연차를 알려주세요 🧚",
+  ],
 };
 
 /** 문자열을 안정적인 숫자로 접는다(문구 고정용). */
@@ -53,6 +79,8 @@ export interface MascotMessageInput {
   leaveDays?: number;
   restDays?: number;
   count?: number;
+  /** 시뮬레이션 중인 연도. 미래 연도 문구에서 쓴다. */
+  year?: number;
 }
 
 export function pickMascotMessage({
@@ -61,17 +89,30 @@ export function pickMascotMessage({
   leaveDays,
   restDays,
   count,
+  year,
 }: MascotMessageInput): string {
   const pool = MESSAGES[mood];
   const template = pool[hash(seed) % pool.length];
   return template
     .replace("{leave}", String(leaveDays ?? 0))
     .replace("{rest}", String(restDays ?? 0))
-    .replace("{count}", String(count ?? 0));
+    .replace("{count}", String(count ?? 0))
+    .replace("{year}", String(year ?? ""));
 }
 
-/** 최고 점수에 따라 어떤 말투를 쓸지 정한다. */
-export function moodForScore(bestScore: number, chanceCount: number): MascotMood {
+/**
+ * 최고 점수에 따라 어떤 말투를 쓸지 정한다.
+ * 미래 연도는 "올해"를 전제로 한 문구가 어색하므로 별도 말투를 쓴다.
+ */
+export function moodForScore(
+  bestScore: number,
+  chanceCount: number,
+  isFutureYear = false,
+): MascotMood {
+  if (isFutureYear) {
+    if (chanceCount === 0) return "futureEmpty";
+    return bestScore >= 85 ? "futureGreat" : "futureFound";
+  }
   if (chanceCount === 0) return "empty";
   if (bestScore >= 85) return "great";
   if (bestScore >= 65) return "found";

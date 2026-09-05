@@ -4,6 +4,7 @@ import styles from "./StartPanel.module.css";
 import { slothBeach } from "../../assets/mascot";
 import { usePlanner } from "../../state/PlannerContext";
 import { describeLeaveExpiry } from "../../data/companyPolicy";
+import { track } from "../../features/analytics";
 
 const QUICK_OPTIONS = [3, 5, 7.5, 10, 15];
 
@@ -24,6 +25,9 @@ export function StartPanel() {
     if (!isValid) return;
     setRemainingLeaveDays(parsed);
     markCalculated();
+    // 익명 통계. 실패해도 계산에는 아무 영향이 없다.
+    track("leave_input", { leaveDays: parsed });
+    track("simulation_start", { leaveDays: parsed });
   };
 
   return (

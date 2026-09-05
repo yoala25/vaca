@@ -13,6 +13,11 @@ import {
   type LeaveExpiryPreset,
 } from "../../data/companyPolicy";
 import { asLocalDate, formatDateRange } from "../../domain/vacation";
+import {
+  sanitizeLeaveDays,
+  sanitizeShortText,
+  sanitizeWorkMinutes,
+} from "../../lib/validation";
 
 const EXTRA_LEAVE_PRESETS = ["리프레시휴가", "안식휴가", "장기근속휴가", "보상휴가"];
 
@@ -48,14 +53,15 @@ export function CompanyPolicyForm() {
   };
 
   const addExtraLeave = () => {
-    const days = Number(extraDays);
-    if (!extraName.trim() || !Number.isFinite(days) || days <= 0) {
+    const name = sanitizeShortText(extraName);
+    const days = sanitizeLeaveDays(extraDays, 0);
+    if (!name || days <= 0) {
       setError("휴가 이름과 일수를 확인해 주세요.");
       return;
     }
     const entry: ExtraLeaveEntry = {
       id: `extra-${Date.now()}`,
-      name: extraName.trim(),
+      name,
       days,
     };
     patch({ extraLeaves: [...draft.extraLeaves, entry] });
@@ -64,7 +70,8 @@ export function CompanyPolicyForm() {
   };
 
   const addHoliday = () => {
-    if (!holidayName.trim() || !holidayStart) {
+    const name = sanitizeShortText(holidayName);
+    if (!name || !holidayStart) {
       setError("휴무일 이름과 시작일을 입력해 주세요.");
       return;
     }
@@ -77,7 +84,7 @@ export function CompanyPolicyForm() {
       }
       const entry: CompanyHolidayEntry = {
         id: `company-${Date.now()}`,
-        name: holidayName.trim(),
+        name,
         startDate,
         endDate,
         recurring: false,
@@ -110,7 +117,7 @@ export function CompanyPolicyForm() {
               step={0.5}
               value={draft.baseLeaveDays}
               onChange={(event) =>
-                patch({ baseLeaveDays: Math.max(0, Number(event.target.value)) })
+                patch({ baseLeaveDays: sanitizeLeaveDays(event.target.value, draft.baseLeaveDays) })
               }
               aria-label="기본 연차 일수"
             />
@@ -195,7 +202,10 @@ export function CompanyPolicyForm() {
               value={draft.hourlyUnitMinutes ?? ""}
               onChange={(event) =>
                 patch({
-                  hourlyUnitMinutes: event.target.value ? Number(event.target.value) : null,
+                  hourlyUnitMinutes:
+                    HOURLY_UNIT_OPTIONS.find(
+                      (option) => String(option.value ?? "") === event.target.value,
+                    )?.value ?? null,
                 })
               }
               aria-label="시간차 단위"
@@ -219,7 +229,12 @@ export function CompanyPolicyForm() {
               step={0.5}
               value={draft.dailyWorkMinutes / 60}
               onChange={(event) =>
-                patch({ dailyWorkMinutes: Math.max(60, Math.round(Number(event.target.value) * 60)) })
+                patch({
+                  dailyWorkMinutes: sanitizeWorkMinutes(
+                    Number(event.target.value) * 60,
+                    draft.dailyWorkMinutes,
+                  ),
+                })
               }
               aria-label="하루 근무시간"
             />

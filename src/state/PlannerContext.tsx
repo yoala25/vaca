@@ -14,6 +14,9 @@ import {
   createDefaultLeaveCatalog,
   createVacationEngine,
   createWorkSchedule,
+  localDate,
+  maxDate,
+  toCivil,
   todayInSeoul,
   type CompanyHoliday,
   type LocalDate,
@@ -22,12 +25,22 @@ import {
 } from "../domain/vacation";
 import {
   DEFAULT_COMPANY_POLICY,
-  remainingLeaveDays,
   resolveLeaveExpiryDate,
   totalLeaveDays,
   type CompanyPolicy,
 } from "../data/companyPolicy";
 import { getHolidaySet } from "../data/holidayProvider";
+import { SUPPORTED_HOLIDAY_YEARS } from "../data/holidays";
+import {
+  describeLeaveAmount,
+  entryTypeFor,
+  getLeaveDays,
+  sanitizeWallet,
+  setLeaveDays,
+  type LeaveEntryType,
+  type LeaveWallet,
+} from "../data/leaveWallet";
+import { sanitizeLeaveDays, sanitizeWorkMinutes, sanitizeYear } from "../lib/validation";
 import { useAuth } from "../features/auth/AuthContext";
 import { loadPlannerState, savePlannerState, type SyncStatus } from "../features/sync/plannerSync";
 
@@ -69,6 +82,8 @@ interface PersistedState {
   manualLeaveDates: LocalDate[];
   /** 추천된 휴가 중 사용자가 "이 날은 안 쓸래"라고 취소한 날짜. */
   excludedDates: LocalDate[];
+  /** 연도별 연차 지갑. 연도마다 값이 완전히 독립적이다. */
+  leaveWallet: LeaveWallet;
   /** 게스트가 연차를 입력하고 "계산하기"를 눌렀는지. */
   hasCalculated: boolean;
   onboardingComplete: boolean;
@@ -88,22 +103,62 @@ const DEFAULT_STATE: PersistedState = {
   savedRanges: [],
   manualLeaveDates: [],
   excludedDates: [],
+  leaveWallet: {},
   hasCalculated: false,
   onboardingComplete: false,
   companyPolicy: DEFAULT_COMPANY_POLICY,
 };
+
+/**
+ * 외부에서 들어온 상태(localStorage · 서버 저장본)를 앱이 믿을 수 있는 형태로 만든다.
+ * 두 경로 모두 사용자가 조작할 수 있으므로 반드시 여기를 거쳐야 한다.
+ */
+function normalizeState(parsed: Partial<PersistedState> | null | undefined): PersistedState {
+  if (!parsed || typeof parsed !== "object") return DEFAULT_STATE;
+
+  const currentYear = toCivil(todayInSeoul()).year;
+  const companyPolicy = { ...DEFAULT_COMPANY_POLICY, ...(parsed.companyPolicy ?? {}) };
+  companyPolicy.remainingLeaveDays = sanitizeLeaveDays(companyPolicy.remainingLeaveDays, 0);
+  companyPolicy.baseLeaveDays = sanitizeLeaveDays(companyPolicy.baseLeaveDays, 0);
+  companyPolicy.dailyWorkMinutes = sanitizeWorkMinutes(companyPolicy.dailyWorkMinutes);
+
+  let leaveWallet = sanitizeWallet(parsed.leaveWallet, currentYear);
+
+  // 이전 버전은 연차를 companyPolicy 한 곳에만 저장했다.
+  // 지갑이 비어 있으면 그 값을 올해 항목으로 옮겨 준다(기존 사용자 데이터 보존).
+  if (Object.keys(leaveWallet).length === 0) {
+    leaveWallet = {
+      [currentYear]: { days: companyPolicy.remainingLeaveDays, type: "remaining" },
+    };
+  }
+
+  /*
+   * 아는 키만 골라 담는다(화이트리스트).
+   * 저장소는 사용자가 직접 편집할 수 있으므로, 모르는 키를 통째로 넘기면
+   * isAdmin 같은 값이 상태에 섞여 들어가 다시 저장된다. 앱은 그런 값을 읽지 않지만
+   * 애초에 담기지 않는 편이 안전하다.
+   */
+  return {
+    ...DEFAULT_STATE,
+    workPattern: parsed.workPattern ?? DEFAULT_STATE.workPattern,
+    strategy: parsed.strategy ?? DEFAULT_STATE.strategy,
+    hasCalculated: parsed.hasCalculated === true,
+    onboardingComplete: parsed.onboardingComplete === true,
+    companyPolicy,
+    leaveWallet,
+    // 배열이어야 하는 값이 다른 타입으로 조작돼도 렌더가 깨지지 않게 한다.
+    savedRanges: Array.isArray(parsed.savedRanges) ? parsed.savedRanges : [],
+    manualLeaveDates: Array.isArray(parsed.manualLeaveDates) ? parsed.manualLeaveDates : [],
+    excludedDates: Array.isArray(parsed.excludedDates) ? parsed.excludedDates : [],
+  };
+}
 
 function loadState(storageKey: string): PersistedState {
   if (typeof window === "undefined") return DEFAULT_STATE;
   try {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return DEFAULT_STATE;
-    const parsed = JSON.parse(raw) as Partial<PersistedState>;
-    return {
-      ...DEFAULT_STATE,
-      ...parsed,
-      companyPolicy: { ...DEFAULT_COMPANY_POLICY, ...(parsed.companyPolicy ?? {}) },
-    };
+    return normalizeState(JSON.parse(raw) as Partial<PersistedState>);
   } catch {
     return DEFAULT_STATE;
   }
@@ -125,8 +180,25 @@ interface PlannerContextValue {
 
   /** 보유 연차에서 직접 추가한 휴가를 뺀, 추천에 쓸 수 있는 연차. */
   availableLeaveDays: number;
-  /** 사용자가 입력한 남은 연차(직접 추가분 차감 전). */
+  /** 사용자가 입력한 남은/예상 연차(직접 추가분 차감 전). */
   remainingLeaveDays: number;
+
+  // ── 연도 선택 & 연차 지갑 ──
+  /** 지금 보고 있는 연도. */
+  selectedYear: number;
+  /** 오늘 기준 연도. */
+  currentYear: number;
+  /** 선택 가능한 연도 목록(공휴일 데이터가 있는 연도만). */
+  availableYears: number[];
+  isFutureYear: boolean;
+  /** 현재 연도면 "남은 연차", 미래면 "예상 연차". */
+  leaveEntryType: LeaveEntryType;
+  /** 선택 연도의 연차 값이 아직 입력되지 않았는지. */
+  needsLeaveInput: boolean;
+  leaveWallet: LeaveWallet;
+  leaveAmountHint: string;
+  setSelectedYear: (year: number) => void;
+  setLeaveDaysForYear: (year: number, days: number) => void;
   /** 기본 연차 + 리프레시휴가 등을 합친 올해 전체 휴가일수. */
   totalLeaveDays: number;
   today: LocalDate;
@@ -185,11 +257,8 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     void loadPlannerState<PersistedState>(userId).then((result) => {
       if (!active) return;
       if (result.status === "found" && result.state) {
-        setState({
-          ...DEFAULT_STATE,
-          ...result.state,
-          companyPolicy: { ...DEFAULT_COMPANY_POLICY, ...(result.state.companyPolicy ?? {}) },
-        });
+        // 서버 저장본도 신뢰하지 않는다. 로컬 저장본과 똑같이 검증해서 넣는다.
+        setState(normalizeState(result.state));
         setSyncStatus("saved");
       } else if (result.status === "unavailable") {
         if (hasLocalCopy) setState(loadState(storageKey));
@@ -233,18 +302,52 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
 
   // 오늘 날짜는 렌더마다 다시 읽지 않는다(계산 캐시가 무효화되므로).
   const today = useMemo(() => todayInSeoul(), []);
-  const leaveExpiryDate = useMemo(
-    () => resolveLeaveExpiryDate(state.companyPolicy, today),
-    [state.companyPolicy, today],
+  const currentYear = toCivil(today).year;
+
+  // 선택 가능한 연도: 올해부터, 공휴일 데이터가 있는 만큼(최소 2년 앞까지).
+  const availableYears = useMemo(
+    () => SUPPORTED_HOLIDAY_YEARS.filter((year) => year >= currentYear),
+    [currentYear],
   );
 
-  const companyRemaining = remainingLeaveDays(state.companyPolicy);
+  const [selectedYear, setSelectedYearState] = useState<number>(() =>
+    sanitizeYear(readYearFromUrl(), availableYears, currentYear),
+  );
+
+  // URL(?year=)과 선택 연도를 동기화해 새로고침·공유해도 유지되게 한다.
+  useEffect(() => {
+    writeYearToUrl(selectedYear, currentYear);
+  }, [selectedYear, currentYear]);
+
+  const isFutureYear = selectedYear > currentYear;
+  const leaveEntryType: LeaveEntryType = entryTypeFor(selectedYear, currentYear);
+
+  /** 선택 연도의 연차. 값이 없으면 undefined — 다른 연도 값으로 대체하지 않는다. */
+  const leaveDaysForYear = getLeaveDays(state.leaveWallet, selectedYear);
+  const hasLeaveForYear = leaveDaysForYear !== undefined;
+
+  /**
+   * 연차 소멸일은 선택 연도 기준으로 계산한다.
+   * 미래 연도는 그 해 1월 1일을 기준일로 삼아 "그 해의 12/31" 같은 규칙이 그대로 적용된다.
+   */
+  const leaveExpiryDate = useMemo(
+    () =>
+      resolveLeaveExpiryDate(
+        state.companyPolicy,
+        isFutureYear ? localDate(selectedYear, 1, 1) : today,
+      ),
+    [state.companyPolicy, today, selectedYear, isFutureYear],
+  );
+
+  const companyRemaining = leaveDaysForYear ?? 0;
   // 직접 찍은 휴가는 이미 쓰기로 한 연차이므로 추천 예산에서 뺀다.
   const availableLeaveDays = Math.max(0, companyRemaining - state.manualLeaveDates.length);
 
   const result = useMemo(() => {
+    // 올해는 오늘부터, 미래 연도는 그 해 1월 1일부터 탐색한다.
+    const yearStart = localDate(selectedYear, 1, 1);
     const dateRange = {
-      startDate: today,
+      startDate: maxDate(yearStart, today),
       endDate: addDays(leaveExpiryDate, RANGE_TAIL_DAYS),
     };
     const workSchedule = createWorkSchedule({
@@ -261,7 +364,9 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
 
     const leaveCatalog = createDefaultLeaveCatalog({
       annualRemainingMinutes: availableLeaveDays * state.companyPolicy.dailyWorkMinutes,
-      annualTotalMinutes: totalLeaveDays(state.companyPolicy) * state.companyPolicy.dailyWorkMinutes,
+      annualTotalMinutes:
+        Math.max(totalLeaveDays(state.companyPolicy), companyRemaining) *
+        state.companyPolicy.dailyWorkMinutes,
       halfDayEnabled: state.companyPolicy.halfDayEnabled,
       hourlyUnitMinutes: state.companyPolicy.hourlyUnitMinutes,
       standardDailyWorkMinutes: state.companyPolicy.dailyWorkMinutes,
@@ -280,8 +385,10 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     });
   }, [
     today,
+    selectedYear,
     leaveExpiryDate,
     availableLeaveDays,
+    companyRemaining,
     state.workPattern,
     state.strategy,
     state.companyPolicy,
@@ -300,7 +407,23 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     onboardingComplete: state.onboardingComplete,
     availableLeaveDays,
     remainingLeaveDays: companyRemaining,
-    totalLeaveDays: totalLeaveDays(state.companyPolicy),
+    totalLeaveDays: Math.max(totalLeaveDays(state.companyPolicy), companyRemaining),
+
+    selectedYear,
+    currentYear,
+    availableYears,
+    isFutureYear,
+    leaveEntryType,
+    needsLeaveInput: !hasLeaveForYear,
+    leaveWallet: state.leaveWallet,
+    leaveAmountHint: describeLeaveAmount(companyRemaining),
+    setSelectedYear: (year) =>
+      setSelectedYearState(sanitizeYear(year, availableYears, currentYear)),
+    setLeaveDaysForYear: (year, days) =>
+      setState((current) => ({
+        ...current,
+        leaveWallet: setLeaveDays(current.leaveWallet, year, days, currentYear),
+      })),
     today,
     leaveExpiryDate,
     syncStatus,
@@ -309,16 +432,19 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     setWorkPattern: (workPattern) => setState((s) => ({ ...s, workPattern })),
     setStrategy: (strategy) => setState((s) => ({ ...s, strategy })),
     /*
-     * 남은 연차는 사용자가 입력한 값을 그대로 저장한다.
-     * 회사 휴가제도에서 전체 휴가일수(리프레시휴가 등)를 바꿔도 이 값은 건드리지 않는다.
+     * 남은/예상 연차는 "지금 보고 있는 연도"의 지갑 항목에 저장한다.
+     * 연도별로 완전히 분리되므로 2026년 값을 바꿔도 2027년 값은 그대로다.
+     * 회사 휴가제도의 전체 휴가일수(리프레시휴가 등)와도 서로 영향을 주지 않는다.
      */
     setRemainingLeaveDays: (value) =>
-      setState((s) => ({
-        ...s,
-        companyPolicy: {
-          ...s.companyPolicy,
-          remainingLeaveDays: Math.max(0, Math.min(90, value)),
-        },
+      setState((current) => ({
+        ...current,
+        leaveWallet: setLeaveDays(current.leaveWallet, selectedYear, value, currentYear),
+        // 올해 값은 회사 휴가제도 화면과도 맞춰 둔다(기존 화면 호환).
+        companyPolicy:
+          selectedYear === currentYear
+            ? { ...current.companyPolicy, remainingLeaveDays: sanitizeLeaveDays(value) }
+            : current.companyPolicy,
       })),
     updateCompanyPolicy: (companyPolicy) => setState((s) => ({ ...s, companyPolicy })),
     toggleSavedRange: (range) =>
@@ -359,4 +485,25 @@ export function usePlanner(): PlannerContextValue {
   const ctx = useContext(PlannerContext);
   if (!ctx) throw new Error("usePlanner must be used within PlannerProvider");
   return ctx;
+}
+
+/** URL 의 ?year= 값을 읽는다. 검증은 호출부에서 한다. */
+function readYearFromUrl(): unknown {
+  if (typeof window === "undefined") return undefined;
+  // HashRouter 를 쓰므로 해시 뒤 쿼리와 일반 쿼리를 모두 살펴본다.
+  const search = new URLSearchParams(window.location.search).get("year");
+  if (search) return search;
+  const hash = window.location.hash;
+  const index = hash.indexOf("?");
+  if (index === -1) return undefined;
+  return new URLSearchParams(hash.slice(index + 1)).get("year") ?? undefined;
+}
+
+/** 올해면 파라미터를 지우고, 미래 연도면 ?year= 를 남긴다. */
+function writeYearToUrl(year: number, currentYear: number): void {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (year === currentYear) url.searchParams.delete("year");
+  else url.searchParams.set("year", String(year));
+  window.history.replaceState(null, "", url.toString());
 }

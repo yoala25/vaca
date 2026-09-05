@@ -9,6 +9,11 @@ import { useWorkingWeekday } from "../../lib/useWorkingWeekday";
 import { slothHammock } from "../../assets/mascot";
 import { describeLeaveExpiry } from "../../data/companyPolicy";
 import { MascotMessage } from "../../features/highlights/MascotMessage";
+import { track } from "../../features/analytics";
+import { YearBar } from "../../features/wallet/YearBar";
+import { LeaveWalletPanel } from "../../features/wallet/LeaveWalletPanel";
+import { FutureYearSetup } from "../../features/wallet/FutureYearSetup";
+import { NextYearCta } from "../../features/wallet/NextYearCta";
 import { TopChances } from "../../features/highlights/TopChances";
 import { VacationRadar } from "../../features/highlights/VacationRadar";
 import {
@@ -34,6 +39,10 @@ import {
 
 /** 기본 달력은 4개월을 한 번에 보여준다(휴가 설계는 한 달 단위로는 판단이 안 되므로). */
 const DEFAULT_MONTH_COUNT = 4;
+
+function maxDate(a: LocalDate, b: LocalDate): LocalDate {
+  return a >= b ? a : b;
+}
 
 function startOfMonth(date: LocalDate): LocalDate {
   const { year, month } = toCivil(date);
@@ -64,12 +73,18 @@ export function Home() {
     toggleSavedRange,
     isRangeSaved,
     companyPolicy,
+    selectedYear,
+    currentYear,
+    isFutureYear,
+    leaveEntryType,
+    needsLeaveInput,
   } = planner;
 
   const ranges = result.calendarOverlay.ranges;
   const isWorkingWeekday = useWorkingWeekday();
   const [startMonth, setStartMonth] = useState<LocalDate>(() => startOfMonth(today));
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
+  const [walletOpen, setWalletOpen] = useState(false);
 
   /*
    * 전략을 바꿀 때만 첫 추천이 있는 달로 달력을 옮긴다.
@@ -79,9 +94,14 @@ export function Home() {
   useEffect(() => {
     const first = ranges[0];
     setSelectedId(first?.candidateId);
-    if (first) setStartMonth(startOfMonth(first.startDate));
+    if (first) {
+      setStartMonth(startOfMonth(first.startDate));
+    } else {
+      // 추천이 없어도 달력은 선택한 연도 안에 머물러야 한다.
+      setStartMonth(startOfMonth(maxDate(localDate(selectedYear, 1, 1), today)));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [strategy]);
+  }, [strategy, selectedYear]);
 
   const selected = useMemo(
     () => ranges.find((range) => range.candidateId === selectedId) ?? ranges[0],
@@ -97,7 +117,7 @@ export function Home() {
     [result.rankedCandidates],
   );
   const topChances = useMemo(() => pickTopChances(scoredEntries), [scoredEntries]);
-  const radarYear = toCivil(leaveExpiryDate).year;
+  const radarYear = selectedYear;
   const radar = useMemo(
     () => annotateHighlights(buildMonthlyRadar(scoredEntries, radarYear)),
     [scoredEntries, radarYear],
@@ -107,14 +127,49 @@ export function Home() {
   const mascotText = useMemo(
     () =>
       pickMascotMessage({
-        mood: moodForScore(bestScore, topChances.length),
-        seed: `${strategy}:${remainingLeaveDays}:${scoredEntries.length}:${topChances[0]?.candidate.id ?? "none"}`,
+        mood: moodForScore(bestScore, topChances.length, isFutureYear),
+        seed: `${selectedYear}:${strategy}:${remainingLeaveDays}:${scoredEntries.length}:${topChances[0]?.candidate.id ?? "none"}`,
         leaveDays: topChances[0]?.leaveDays,
         restDays: topChances[0]?.restDays,
         count: scoredEntries.length,
+        year: selectedYear,
       }),
-    [bestScore, topChances, strategy, scoredEntries.length, remainingLeaveDays],
+    [
+      bestScore,
+      topChances,
+      strategy,
+      scoredEntries.length,
+      remainingLeaveDays,
+      selectedYear,
+      isFutureYear,
+    ],
   );
+
+  /*
+   * 추천 결과가 확정될 때 익명 통계를 남긴다.
+   * 연차를 타이핑하는 동안 매 글자마다 기록되지 않도록 1.2초 디바운스한다.
+   * 전송 실패는 무시되며 휴가 계산에는 어떤 영향도 주지 않는다.
+   */
+  useEffect(() => {
+    if (!hasCalculated || needsLeaveInput || remainingLeaveDays <= 0) return;
+    const timer = window.setTimeout(() => {
+      track("simulation_complete", {
+        targetYear: selectedYear,
+        leaveDays: remainingLeaveDays,
+        vacationStyle: strategy,
+        resultDays: result.summary.totalRestDays,
+      });
+      track("result_view", { targetYear: selectedYear });
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [
+    hasCalculated,
+    needsLeaveInput,
+    selectedYear,
+    remainingLeaveDays,
+    strategy,
+    result.summary.totalRestDays,
+  ]);
 
   if (!hasCalculated) return <StartPanel />;
 
@@ -175,45 +230,87 @@ export function Home() {
     focusDate(month.best.startDate);
   };
 
-  const expiryYear = toCivil(leaveExpiryDate).year;
+
   const manualLeaveCount = manualLeaveDates.length;
   const budgetExceeded = availableLeaveDays === 0 && manualLeaveCount > 0;
 
   return (
     <div className={styles.page}>
-      <div className={styles.greeting}>
-        <div>
-          <p className={styles.hello}>안녕하세요 👋</p>
-          <h1 className={styles.title}>올해도 잘 쉬어볼까요?</h1>
-        </div>
+      <YearBar onToggleWallet={() => setWalletOpen((open) => !open)} />
+      {walletOpen && <LeaveWalletPanel />}
 
-        <label className={styles.leaveBox}>
-          <span className={styles.leaveLabel}>
-            전체 휴가 <strong>{totalLeave}일</strong> 중
-          </span>
-          <input
-            className={styles.leaveInput}
-            type="number"
-            min={0}
-            max={90}
-            step={0.5}
-            value={remainingLeaveDays}
-            onChange={(event) => setRemainingLeaveDays(Number(event.target.value))}
-            aria-label="남은 연차 일수"
+      {needsLeaveInput ? (
+        <FutureYearSetup />
+      ) : (
+        <>
+          <div className={styles.greeting}>
+            <div>
+              <p className={styles.hello}>안녕하세요 👋</p>
+              <h1 className={styles.title}>
+                {isFutureYear
+                  ? `${selectedYear}년, 미리 잘 쉬어볼까요?`
+                  : "올해도 잘 쉬어볼까요?"}
+              </h1>
+            </div>
+
+            <label className={styles.leaveBox}>
+              <span className={styles.leaveLabel}>
+                {isFutureYear ? (
+                  <>
+                    {selectedYear}년 <strong>예상 연차</strong>
+                  </>
+                ) : (
+                  <>
+                    전체 휴가 <strong>{totalLeave}일</strong> 중
+                  </>
+                )}
+              </span>
+              <input
+                className={styles.leaveInput}
+                type="number"
+                min={0}
+                max={90}
+                step={0.5}
+                value={remainingLeaveDays}
+                onChange={(event) => setRemainingLeaveDays(Number(event.target.value))}
+                aria-label={`${selectedYear}년 ${leaveEntryType === "expected" ? "예상" : "남은"} 연차 일수`}
+              />
+              <span className={styles.leaveUnit}>{isFutureYear ? "일" : "일 남음"}</span>
+            </label>
+          </div>
+
+          <p className={styles.expiryNote}>
+            🗓️{" "}
+            {isFutureYear ? (
+              <>
+                <strong>{selectedYear}년 전체</strong> 공휴일로 미리 계산했어요. 예상 연차는 언제든
+                바꿀 수 있어요.
+              </>
+            ) : (
+              <>
+                <strong>{describeLeaveExpiry(companyPolicy, today)}</strong>까지 쓸 수 있는 연차
+                기준으로 계산했어요.
+                <button
+                  type="button"
+                  className={styles.inlineLink}
+                  onClick={() => navigate("/company")}
+                >
+                  소멸일 변경
+                </button>
+              </>
+            )}
+          </p>
+
+      <StrategyTabs
+            value={strategy}
+            onChange={(next) => {
+              setStrategy(next);
+              track("vacation_style_select", {
+                targetYear: selectedYear,
+                vacationStyle: next,
+              });
+            }}
           />
-          <span className={styles.leaveUnit}>일 남음</span>
-        </label>
-      </div>
-
-      <p className={styles.expiryNote}>
-        🗓️ <strong>{describeLeaveExpiry(companyPolicy, today)}</strong>까지 쓸 수 있는 연차 기준으로
-        계산했어요.
-        <button type="button" className={styles.inlineLink} onClick={() => navigate("/company")}>
-          소멸일 변경
-        </button>
-      </p>
-
-      <StrategyTabs value={strategy} onChange={setStrategy} />
 
       {result.summary.holidayDataStatus !== HolidayDataStatus.Official && (
         <p className={styles.notice}>
@@ -225,6 +322,8 @@ export function Home() {
 
       <TopChances
         chances={topChances}
+        year={selectedYear}
+        currentYear={currentYear}
         onOpen={openChance}
         onToggleSave={toggleChanceSave}
         isSaved={chanceSaved}
@@ -254,7 +353,7 @@ export function Home() {
             leaveExpiryDate={leaveExpiryDate}
             title={`${toCivil(startMonth).year}년 휴가 배치`}
             onOpenYearView={() => navigate("/calendar")}
-            yearViewLabel={`${expiryYear}년 전체보기`}
+            yearViewLabel={`${selectedYear}년 전체보기`}
           />
 
           {selected && (
@@ -273,7 +372,17 @@ export function Home() {
                 className={`${styles.saveBtn} ${
                   isRangeSaved(selected.candidateId) ? styles.saveBtnActive : ""
                 }`}
-                onClick={() => toggleSavedRange(selected)}
+                onClick={() => {
+                  toggleSavedRange(selected);
+                  if (!isRangeSaved(selected.candidateId)) {
+                    track("save_combination", {
+                      targetYear: selectedYear,
+                      leaveDays: selected.leaveUsedDays,
+                      resultDays: selected.totalRestDays,
+                      vacationStyle: strategy,
+                    });
+                  }
+                }}
               >
                 {isRangeSaved(selected.candidateId) ? "저장됨 ♥" : "이 조합 저장"}
               </button>
@@ -373,7 +482,11 @@ export function Home() {
             </button>
           </section>
         </aside>
-      </div>
+          </div>
+
+          {selectedYear === currentYear && <NextYearCta />}
+        </>
+      )}
     </div>
   );
 }

@@ -4,19 +4,31 @@ import type { VacationChance } from "./vacationRanking";
 
 interface TopChancesProps {
   chances: VacationChance[];
+  /** 시뮬레이션 중인 연도. 미래 연도에서는 "올해"라고 하면 안 된다. */
+  year: number;
+  currentYear: number;
   onOpen: (chance: VacationChance) => void;
   onToggleSave: (chance: VacationChance) => void;
   isSaved: (chance: VacationChance) => boolean;
 }
 
-export function TopChances({ chances, onOpen, onToggleSave, isSaved }: TopChancesProps) {
+export function TopChances({
+  chances,
+  year,
+  currentYear,
+  onOpen,
+  onToggleSave,
+  isSaved,
+}: TopChancesProps) {
   if (chances.length === 0) return null;
 
   return (
     <section className={styles.section}>
       <div className={styles.sectionHead}>
         <h2 className={styles.sectionTitle}>🧚 휴가요정이 찾았어요!</h2>
-        <span className={styles.sectionSub}>올해 남은 기간 중 가장 좋은 조합 {chances.length}개</span>
+        <span className={styles.sectionSub}>
+          {year === currentYear ? "올해 남은 기간" : `${year}년`} 중 가장 좋은 조합 {chances.length}개
+        </span>
       </div>
 
       <div className={styles.topGrid}>

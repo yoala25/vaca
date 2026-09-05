@@ -12,6 +12,15 @@ const TABLE = "planner_states";
 
 export type SyncStatus = "idle" | "loading" | "saving" | "saved" | "error" | "unavailable";
 
+/**
+ * 서버 오류 원문에는 테이블명·제약조건·SQL 상태코드가 섞여 나온다.
+ * 화면에 그대로 띄우면 DB 구조가 드러나므로 일반 문구로 바꾼다.
+ */
+function safeMessage(message: string): string {
+  if (import.meta.env.DEV) console.warn("[sync]", message);
+  return "저장에 실패했어요. 잠시 후 다시 시도해 주세요.";
+}
+
 /** 테이블이 아직 없을 때 나는 오류인지. */
 function isMissingTable(message: string): boolean {
   const lower = message.toLowerCase();
@@ -40,7 +49,7 @@ export async function loadPlannerState<T>(userId: string): Promise<LoadResult<T>
   if (error) {
     return isMissingTable(error.message)
       ? { status: "unavailable", message: "planner_states 테이블이 아직 없어요." }
-      : { status: "error", message: error.message };
+      : { status: "error", message: safeMessage(error.message) };
   }
 
   if (!data?.state) return { status: "empty" };
@@ -60,7 +69,7 @@ export async function savePlannerState<T>(
   if (error) {
     return isMissingTable(error.message)
       ? { ok: false, unavailable: true, message: "planner_states 테이블이 아직 없어요." }
-      : { ok: false, message: error.message };
+      : { ok: false, message: safeMessage(error.message) };
   }
   return { ok: true };
 }

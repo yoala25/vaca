@@ -36,6 +36,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          # 선택 항목. 등록하지 않으면 GA4 없이 동작한다.
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

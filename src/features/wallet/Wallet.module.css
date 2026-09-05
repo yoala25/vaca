@@ -1,0 +1,326 @@
+/* ── 연도 선택 + 연차 요약 ── */
+.yearBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.yearTabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-input);
+}
+
+.yearTab {
+  min-height: 38px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+  white-space: nowrap;
+}
+
+.yearTabActive {
+  background: var(--color-teal-dark);
+  color: #fff;
+}
+
+.leaveSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-mint-pill);
+  border: 1.5px solid var(--color-teal-light);
+}
+
+.leaveLabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+  white-space: nowrap;
+}
+
+.leaveInput {
+  width: 62px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-teal-light);
+  background: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  text-align: right;
+}
+
+.leaveUnit {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.walletToggle {
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-charcoal-soft);
+  white-space: nowrap;
+}
+
+/* ── 연차 지갑 패널 ── */
+.wallet {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.walletHead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.walletTitle {
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.walletSub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.walletGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+@media (min-width: 700px) {
+  .walletGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.walletRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.walletRowActive {
+  border-color: var(--color-teal);
+  background: var(--bg-mint-pill);
+}
+
+.walletYear {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  flex: none;
+}
+
+.walletBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.walletType {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.walletDays {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+}
+
+.walletEmpty {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.walletInput {
+  width: 64px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-teal-light);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.walletEditBtn {
+  flex: none;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.walletHint {
+  margin-top: var(--space-3);
+  font-size: 12.5px;
+  color: var(--text-charcoal-soft);
+}
+
+/* ── 미래 연도 최초 진입 ── */
+.setup {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(160deg, #eaf6f7 0%, #f3ead8 100%);
+  border: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.setupMascot {
+  width: min(42%, 140px);
+  margin: 0 auto;
+  -webkit-mask-image: radial-gradient(ellipse 50% 48% at 50% 47%, #000 50%, rgba(0,0,0,.5) 78%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 48% at 50% 47%, #000 50%, rgba(0,0,0,.5) 78%, transparent 100%);
+}
+
+.setupTitle {
+  margin-top: var(--space-2);
+  font-size: clamp(18px, 2.6vw, 22px);
+  font-weight: 800;
+  color: var(--text-charcoal);
+}
+
+.setupDesc {
+  margin-top: var(--space-2);
+  font-size: 13.5px;
+  color: var(--text-charcoal-soft);
+  line-height: 1.6;
+}
+
+.setupChips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.setupChip {
+  min-height: 46px;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-charcoal-soft);
+}
+
+.setupChipActive {
+  border-color: var(--color-teal);
+  background: #fff;
+  color: var(--color-teal-dark);
+}
+
+.setupCustom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.setupInput {
+  width: 110px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-teal-light);
+  background: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  text-align: center;
+}
+
+.setupConfirm {
+  min-height: 48px;
+  padding: 13px 22px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-teal-dark);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* ── 내년 미리보기 CTA ── */
+.previewCta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-mint-pill);
+  border: 1px solid var(--color-aqua-pale);
+  flex-wrap: wrap;
+}
+
+.previewText {
+  flex: 1;
+  min-width: 160px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+}
+
+.previewBtn {
+  min-height: 40px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-teal-dark);
+  background: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-teal-dark);
+  white-space: nowrap;
+}
+
+/* 연도 탭 보조 표시 */
+.yearTag {
+  margin-left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.65;
+}
+
+.yearDot {
+  margin-left: 3px;
+  color: var(--color-accent-coral, #ff8b6b);
+  font-weight: 900;
+}

@@ -6,6 +6,7 @@ import { AuthProvider } from "./features/auth/AuthContext";
 import { PlannerProvider } from "./state/PlannerContext";
 import { UiProvider } from "./state/UiContext";
 import { AppRoutes } from "./app/router";
+import { AnalyticsTracker } from "./features/analytics";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -16,6 +17,11 @@ createRoot(document.getElementById("root")!).render(
       백엔드가 생겨 서버 rewrite를 붙이면 BrowserRouter로 되돌리면 된다.
     */}
     <HashRouter>
+      {/*
+        익명 페이지뷰 기록. UI를 그리지 않으므로 화면에 아무 영향이 없고,
+        Supabase가 꺼져 있으면 조용히 아무 일도 하지 않는다.
+      */}
+      <AnalyticsTracker />
       <AuthProvider>
         <PlannerProvider>
           <UiProvider>
