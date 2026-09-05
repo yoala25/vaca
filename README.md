@@ -28,10 +28,23 @@ npm run dev
 
 ### 3) 실제 배포할 때
 
+`main` 에 푸시하면 GitHub Actions 가 자동으로 배포합니다.
+
+| | 주소 |
+|---|---|
+| 서비스 | https://yoala25.github.io/vaca/ |
+| 관리자 | https://yoala25.github.io/vaca/#/admin |
+
 ```bash
-npm run build      # dist/ 생성 (정적 호스팅에 업로드)
+npm run build      # dist/ 생성 (수동 배포용)
 npm run preview    # 빌드 결과를 로컬 서버로 확인
 ```
+
+빌드에 필요한 값은 저장소 Secrets 에서 주입됩니다
+(`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, 선택적으로 `VITE_GA_MEASUREMENT_ID`).
+
+> 배포 주소가 바뀌면 Supabase → **Authentication → URL Configuration** 의
+> Site URL 과 Redirect URLs 도 함께 바꿔야 소셜 로그인이 동작합니다.
 
 ## 명령어
 

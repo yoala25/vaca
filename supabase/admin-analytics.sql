@@ -724,7 +724,7 @@ to authenticated;
 -- ============================================================================
 -- 6. 관리자 승격 (이 줄만 이메일 바꿔서 따로 실행)
 --
---    update public.profiles set role = 'admin' where email = 'kspirit2026@gmail.com';
+--    update public.profiles set role = 'admin' where email = 'yennysmail@gmail.com';
 --
 --    확인:
 --    select email, role from public.profiles order by created_at;
