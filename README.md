@@ -104,8 +104,19 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 
 ### 1. 테이블 만들기 (필수)
 
-Supabase 대시보드 → **SQL Editor** 에서 [`supabase/schema.sql`](supabase/schema.sql) 를 실행합니다.
-이 테이블이 없으면 앱은 로컬 저장으로만 동작하고 MY 화면에 안내가 뜹니다.
+Supabase 대시보드 → **SQL Editor** 에서 아래 두 파일을 **둘 다** 실행합니다(순서 무관, 여러 번 실행해도 안전).
+
+| 파일 | 만드는 것 |
+|---|---|
+| [`supabase/schema.sql`](supabase/schema.sql) | 로그인 사용자의 휴가 설정 동기화(`planner_states`) |
+| [`supabase/admin-analytics.sql`](supabase/admin-analytics.sql) | 관리자 권한(`profiles`) · 익명 통계(`analytics_events`) · 집계 함수 |
+
+테이블이 없어도 휴가 계산은 브라우저 안에서 그대로 동작하고, 로그인·통계·관리자 기능만 꺼집니다.
+
+> **프로젝트를 새로 만들어 옮길 때** 바꿀 곳은 네 군데입니다:
+> `.env.local`, GitHub Secrets 두 개, Supabase **URL Configuration**,
+> 그리고 구글 로그인을 쓴다면 Google Cloud OAuth 클라이언트의 리디렉션 URI
+> (`https://<새 프로젝트>.supabase.co/auth/v1/callback`).
 
 ### 2. 이메일 가입 설정
 
