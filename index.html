@@ -5,8 +5,31 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#19888d" />
-    <meta name="description" content="휴가요정 - 내 연차를 가장 잘 쓰는 방법" />
+    <meta name="description" content="연차, 주말, 공휴일까지 똑똑하게 계산해 최적의 휴가 조합을 찾아주는 나만의 휴가 플래너" />
     <title>휴가요정</title>
+
+    <!--
+      공유 미리보기(Open Graph).
+      카카오톡·페이스북·슬랙 등에 링크를 붙여넣으면 이 이미지와 문구로 카드가 만들어지고,
+      카드를 누르면 og:url 로 이동한다. 이미지 주소는 전체 URL 이어야 해서
+      빌드 시 .env 의 VITE_SITE_URL 로 채운다.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="휴가요정" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
+    <meta property="og:title" content="휴가요정 - 최적의 휴가 조합을 찾아줄게!" />
+    <meta property="og:description" content="연차, 주말, 공휴일까지 똑똑하게 계산해주는 나만의 휴가 플래너" />
+    <meta property="og:image" content="%VITE_SITE_URL%og-image.jpg" />
+    <meta property="og:image:secure_url" content="%VITE_SITE_URL%og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="밀짚모자를 쓴 나무늘보가 해변 의자에서 쉬고 있는 휴가요정 대표 이미지" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="휴가요정 - 최적의 휴가 조합을 찾아줄게!" />
+    <meta name="twitter:description" content="연차, 주말, 공휴일까지 똑똑하게 계산해주는 나만의 휴가 플래너" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%og-image.jpg" />
   </head>
   <body>
     <div id="root"></div>
