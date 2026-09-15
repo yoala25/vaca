@@ -45,3 +45,22 @@
   font-size: 13.5px;
   color: var(--text-muted);
 }
+
+/*
+ * 모바일: 세 버튼이 한 줄에 모두 보여야 한다.
+ * 가로 스크롤로 넘기게 두면 "연차 절약"이 화면 밖에 숨어 비교가 안 된다.
+ */
+@media (max-width: 767px) {
+  .tabs {
+    overflow-x: visible;
+  }
+
+  .tab {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 6px;
+    font-size: 14px;
+  }
+}

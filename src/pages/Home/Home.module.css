@@ -353,3 +353,42 @@
   color: var(--color-teal-dark);
   text-decoration: underline;
 }
+
+/* ── ① 전략 버튼 영역 ─────────────────────────────────────────────
+ * 모바일·태블릿에서는 스크롤해도 화면 위(상단바 바로 아래)에 붙어 있어서
+ * 달력을 내려 보면서도 장기 집중/수시 휴가/연차 절약을 바로 눌러 비교할 수 있다.
+ * --sticky-top 은 AppShell 이 상단바 높이만큼 정해 준다(상단바가 없으면 0).
+ */
+.strategyBar {
+  position: sticky;
+  top: var(--sticky-top, 0px);
+  z-index: 20;
+  margin-block: calc(-1 * var(--space-2));
+  padding-block: var(--space-2);
+  background: var(--bg-page);
+}
+
+.strategyDescription {
+  margin-top: calc(-1 * var(--space-3));
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+/* 달력으로 스크롤해 올릴 때 고정된 버튼 뒤로 숨지 않게 여백을 둔다 */
+.layout {
+  scroll-margin-top: calc(var(--sticky-top, 0px) + 72px);
+}
+
+@media (min-width: 1200px) {
+  /* PC는 4개월이 한 화면에 들어오므로 고정할 필요가 없다 */
+  .strategyBar {
+    position: static;
+    margin-block: 0;
+    padding-block: 0;
+    background: none;
+  }
+
+  .layout {
+    scroll-margin-top: var(--space-4);
+  }
+}

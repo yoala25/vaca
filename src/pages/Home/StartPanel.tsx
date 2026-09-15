@@ -5,6 +5,7 @@ import { slothBeach } from "../../assets/mascot";
 import { usePlanner } from "../../state/PlannerContext";
 import { describeLeaveExpiry } from "../../data/companyPolicy";
 import { track } from "../../features/analytics";
+import { getLeaveDays } from "../../data/leaveWallet";
 
 const QUICK_OPTIONS = [3, 5, 7.5, 10, 15];
 
@@ -14,20 +15,41 @@ const QUICK_OPTIONS = [3, 5, 7.5, 10, 15];
  */
 export function StartPanel() {
   const navigate = useNavigate();
-  const { remainingLeaveDays, setRemainingLeaveDays, markCalculated, companyPolicy, today } =
-    usePlanner();
-  const [draft, setDraft] = useState<string>(String(remainingLeaveDays));
+  const {
+    setRemainingLeaveDays,
+    setLeaveDaysForYear,
+    markCalculated,
+    companyPolicy,
+    today,
+    leaveWallet,
+    currentYear,
+    selectedYear,
+  } = usePlanner();
+
+  /*
+   * 이 화면은 접속할 때마다 나오므로, 지난번에 입력한 올해 연차를 미리 채워 둔다.
+   * 주소가 ?year=2027 로 열렸더라도 여기서 묻는 것은 "올해" 연차다.
+   */
+  const savedDays = getLeaveDays(leaveWallet, currentYear);
+  const [draft, setDraft] = useState<string>(
+    savedDays !== undefined && savedDays > 0 ? String(savedDays) : "",
+  );
 
   const parsed = Number(draft);
-  const isValid = Number.isFinite(parsed) && parsed > 0 && parsed <= 60;
+  const isValid = draft.trim() !== "" && Number.isFinite(parsed) && parsed > 0 && parsed <= 60;
 
   const calculate = () => {
     if (!isValid) return;
-    setRemainingLeaveDays(parsed);
+    if (selectedYear === currentYear) {
+      // 올해를 보고 있으면 기존 경로(회사 휴가제도 화면과의 동기화 포함)를 그대로 쓴다.
+      setRemainingLeaveDays(parsed);
+    } else {
+      setLeaveDaysForYear(currentYear, parsed);
+    }
     markCalculated();
     // 익명 통계. 실패해도 계산에는 아무 영향이 없다.
-    track("leave_input", { leaveDays: parsed });
-    track("simulation_start", { leaveDays: parsed });
+    track("leave_input", { targetYear: currentYear, leaveDays: parsed });
+    track("simulation_start", { targetYear: currentYear, leaveDays: parsed });
   };
 
   return (
@@ -50,6 +72,7 @@ export function StartPanel() {
             max={60}
             step={0.5}
             value={draft}
+            placeholder="7.5"
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && calculate()}
             aria-label="남은 연차 일수"

@@ -33,9 +33,14 @@ export const STRATEGY_TABS: StrategyOption[] = [
 interface StrategyTabsProps {
   value: VacationStrategy;
   onChange: (value: VacationStrategy) => void;
+  /**
+   * 설명 문장을 숨긴다. 홈에서는 버튼만 화면 위에 고정하고
+   * 설명은 고정 영역 밖에 따로 두기 위해 쓴다(모바일에서 달력이 가려지지 않게).
+   */
+  hideDescription?: boolean;
 }
 
-export function StrategyTabs({ value, onChange }: StrategyTabsProps) {
+export function StrategyTabs({ value, onChange, hideDescription = false }: StrategyTabsProps) {
   const active = STRATEGY_TABS.find((tab) => tab.id === value) ?? STRATEGY_TABS[0];
 
   return (
@@ -55,7 +60,7 @@ export function StrategyTabs({ value, onChange }: StrategyTabsProps) {
           </button>
         ))}
       </div>
-      <p className={styles.description}>{active.description}</p>
+      {!hideDescription && <p className={styles.description}>{active.description}</p>}
     </div>
   );
 }

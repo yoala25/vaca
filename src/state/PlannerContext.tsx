@@ -86,7 +86,6 @@ interface PersistedState {
   /** 연도별 연차 지갑. 연도마다 값이 완전히 독립적이다. */
   leaveWallet: LeaveWallet;
   /** 게스트가 연차를 입력하고 "계산하기"를 눌렀는지. */
-  hasCalculated: boolean;
   onboardingComplete: boolean;
   companyPolicy: CompanyPolicy;
 }
@@ -105,7 +104,6 @@ const DEFAULT_STATE: PersistedState = {
   manualLeaveDates: [],
   excludedDates: [],
   leaveWallet: {},
-  hasCalculated: false,
   onboardingComplete: false,
   companyPolicy: DEFAULT_COMPANY_POLICY,
 };
@@ -143,7 +141,6 @@ function normalizeState(parsed: Partial<PersistedState> | null | undefined): Per
     ...DEFAULT_STATE,
     workPattern: parsed.workPattern ?? DEFAULT_STATE.workPattern,
     strategy: parsed.strategy ?? DEFAULT_STATE.strategy,
-    hasCalculated: parsed.hasCalculated === true,
     onboardingComplete: parsed.onboardingComplete === true,
     companyPolicy,
     leaveWallet,
@@ -234,6 +231,13 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
 
   const [state, setState] = useState<PersistedState>(() => loadState(storageKeyFor(userId)));
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
+
+  /*
+   * "연차 질문을 지나 시뮬레이터로 들어왔는가"는 영구 저장하지 않고 탭 단위로만 기억한다.
+   * 새로 접속하면 항상 질문 페이지부터 보여주되(지난 입력값은 미리 채워진다),
+   * 같은 탭에서 새로고침하거나 구글 로그인 후 돌아왔을 때는 보던 화면을 유지하기 위해서다.
+   */
+  const [hasCalculated, setHasCalculated] = useState<boolean>(readSessionCalculated);
 
   /*
    * 계정이 바뀌면(로그인/로그아웃) 그 계정의 저장본을 불러온다.
@@ -433,7 +437,7 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     savedRanges: state.savedRanges,
     manualLeaveDates: state.manualLeaveDates,
     excludedDates: state.excludedDates,
-    hasCalculated: state.hasCalculated,
+    hasCalculated,
     onboardingComplete: state.onboardingComplete,
     availableLeaveDays,
     remainingLeaveDays: companyRemaining,
@@ -502,8 +506,14 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
           : { ...s, excludedDates: [...s.excludedDates, date].sort() },
       ),
     clearExcludedDates: () => setState((s) => ({ ...s, excludedDates: [] })),
-    markCalculated: () => setState((s) => ({ ...s, hasCalculated: true })),
-    resetCalculation: () => setState((s) => ({ ...s, hasCalculated: false })),
+    markCalculated: () => {
+      writeSessionCalculated(true);
+      setHasCalculated(true);
+    },
+    resetCalculation: () => {
+      writeSessionCalculated(false);
+      setHasCalculated(false);
+    },
     completeOnboarding: () => setState((s) => ({ ...s, onboardingComplete: true })),
     restartOnboarding: () => setState((s) => ({ ...s, onboardingComplete: false })),
   };
@@ -536,4 +546,24 @@ function writeYearToUrl(year: number, currentYear: number): void {
   if (year === currentYear) url.searchParams.delete("year");
   else url.searchParams.set("year", String(year));
   window.history.replaceState(null, "", url.toString());
+}
+
+const SESSION_CALCULATED_KEY = "hyugayojeong-session-calculated";
+
+/** 이 탭에서 이미 연차 질문을 통과했는지. 저장소를 못 쓰면 질문부터 보여준다. */
+function readSessionCalculated(): boolean {
+  try {
+    return window.sessionStorage.getItem(SESSION_CALCULATED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeSessionCalculated(value: boolean): void {
+  try {
+    if (value) window.sessionStorage.setItem(SESSION_CALCULATED_KEY, "1");
+    else window.sessionStorage.removeItem(SESSION_CALCULATED_KEY);
+  } catch {
+    // 저장에 실패해도 이번 화면 전환은 메모리 상태로 그대로 동작한다.
+  }
 }
