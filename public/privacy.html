@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>개인정보처리방침 | 휴가요정</title>
+<meta name="description" content="휴가요정이 수집하는 정보와 이용 목적, 보관 기간, 이용자의 권리를 안내합니다." />
+<link rel="icon" href="./favicon.png" />
+<style>
+  /*
+   * 앱 번들과 무관한 정적 페이지다.
+   * 구글 OAuth 동의 화면·검색엔진·광고 심사가 크롤링할 수 있도록
+   * 해시 라우트(#/privacy)가 아니라 실제 파일 주소로 둔다.
+   */
+  :root {
+    --bg: #fdfbf5;
+    --card: #ffffff;
+    --ink: #2b2b28;
+    --ink-2: #55534c;
+    --ink-3: #8b8a82;
+    --line: #ece7db;
+    --brand: #0f6a6e;
+    --brand-soft: #eff8fa;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151614;
+      --card: #1d1e1c;
+      --ink: #efeee9;
+      --ink-2: #c4c2b9;
+      --ink-3: #8f8e86;
+      --line: #2f302d;
+      --brand: #5cb8bc;
+      --brand-soft: #1b2e2e;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.75 "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    padding: 32px 18px 64px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px clamp(20px, 5vw, 44px) 40px;
+  }
+  .back {
+    display: inline-block;
+    color: var(--brand);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .meta { color: var(--ink-3); font-size: 13px; margin: 0 0 22px; }
+  .summary {
+    background: var(--brand-soft);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 0 0 28px;
+    color: var(--ink);
+  }
+  .summary p { margin: 0; }
+  h2 {
+    font-size: 17px;
+    margin: 34px 0 10px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  h3 { font-size: 15px; margin: 18px 0 6px; }
+  p, li { color: var(--ink-2); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin: 3px 0; }
+  strong { color: var(--ink); }
+  .table-wrap { overflow-x: auto; margin: 10px 0; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 9px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--ink-3); font-weight: 700; font-size: 13px; }
+  td { color: var(--ink-2); }
+  a { color: var(--brand); }
+  footer { text-align: center; color: var(--ink-3); font-size: 13px; margin-top: 26px; }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← 휴가요정으로 돌아가기</a>
+  <h1>개인정보처리방침</h1>
+  <p class="meta">시행일: 2026년 9월 15일</p>
+
+  <div class="summary">
+    <p>
+      <strong>한눈에 보기</strong> — 휴가요정은 로그인 없이 쓸 수 있고, 이때 입력한 휴가 설정은
+      <strong>이용자의 브라우저에만</strong> 저장됩니다. 서비스 개선을 위해 개인을 알아볼 수 없는
+      익명 이용 통계를 모으며, 회원가입을 선택한 경우에만 계정 정보를 보관합니다.
+    </p>
+  </div>
+
+  <h2>1. 수집하는 정보</h2>
+
+  <h3>① 로그인 없이 이용할 때</h3>
+  <p>
+    남은 연차, 회사 휴가제도, 찜한 휴가 조합 등 입력하신 내용은 이용자 기기의 브라우저 저장소
+    (localStorage)에만 저장되며 서버로 전송하지 않습니다.
+  </p>
+
+  <h3>② 익명 이용 통계 (모든 이용자)</h3>
+  <p>어떤 기능이 쓰이는지 파악해 서비스를 개선하기 위해 아래 항목을 기록합니다.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>항목</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>방문자 ID · 세션 ID</td><td>브라우저가 무작위로 만든 식별자. 이름·이메일 등과 연결되지 않습니다.</td></tr>
+        <tr><td>이용 기록</td><td>방문한 화면 경로, 사용한 기능(예: 계산 시작, 연도 선택, 공유)</td></tr>
+        <tr><td>휴가 계산 정보</td><td>선택한 연도, 입력한 연차 일수, 휴가 스타일, 추천 결과의 휴식일 수</td></tr>
+        <tr><td>유입 경로</td><td>이전 사이트의 도메인(주소 전체가 아닌 도메인만), 광고·캠페인 태그(UTM)</td></tr>
+        <tr><td>기기 구분</td><td>화면 너비로 판단한 모바일 / 태블릿 / 데스크톱</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    이 통계에는 <strong>이름, 이메일, 전화번호, IP 주소, 정확한 위치, 브라우저 지문(fingerprint)</strong>을
+    저장하지 않습니다.
+  </p>
+
+  <h3>③ 회원가입을 선택한 경우</h3>
+  <ul>
+    <li><strong>이메일로 가입:</strong> 이메일 주소, 이름(입력한 경우), 비밀번호(암호화되어 저장되며 운영자도 볼 수 없음)</li>
+    <li><strong>구글로 가입:</strong> 구글이 제공하는 이메일 주소, 이름, 프로필 사진 주소</li>
+    <li><strong>공통:</strong> 여러 기기에서 이어 쓰기 위해 동기화한 휴가 설정</li>
+  </ul>
+
+  <h2>2. 이용 목적</h2>
+  <ul>
+    <li>휴가 일정 추천 기능 제공</li>
+    <li>회원의 휴가 설정을 여러 기기에서 이어 쓸 수 있도록 동기화</li>
+    <li>서비스 이용 현황 분석 및 개선</li>
+  </ul>
+  <p>수집한 정보를 판매하거나, 위 목적 외의 용도로 쓰지 않습니다.</p>
+
+  <h2>3. 보관 기간과 삭제</h2>
+  <ul>
+    <li><strong>브라우저에 저장된 설정:</strong> 이용자가 브라우저의 사이트 데이터를 지우면 즉시 삭제됩니다.</li>
+    <li><strong>회원 정보와 동기화된 설정:</strong> 회원 탈퇴 시까지 보관합니다. 탈퇴를 원하시면 아래 문의처로
+      요청해 주세요. 확인 후 지체 없이 삭제합니다.</li>
+    <li><strong>익명 이용 통계:</strong> 개인을 알아볼 수 없는 형태로, 서비스 개선에 필요한 기간 동안 보관합니다.
+      방문자 ID는 브라우저 저장소를 지우면 새로 만들어져 이전 기록과 연결되지 않습니다.</li>
+  </ul>
+
+  <h2>4. 처리를 맡기는 곳</h2>
+  <p>서비스 운영을 위해 아래 업체의 인프라를 이용합니다.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>업체</th><th>맡기는 일</th></tr></thead>
+      <tbody>
+        <tr><td>Supabase</td><td>회원 인증, 동기화된 설정 및 익명 통계 저장</td></tr>
+        <tr><td>GitHub (GitHub Pages)</td><td>웹사이트 호스팅</td></tr>
+        <tr><td>Google</td><td>구글 계정 로그인 (구글로 가입한 경우)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    위 업체들은 보안과 서비스 운영을 위해 접속 기록(IP 주소 등)을 각 사의 정책에 따라 일시적으로 남길 수 있습니다.
+    휴가요정의 통계 데이터베이스에는 IP 주소를 저장하지 않습니다.
+  </p>
+
+  <h2>5. 브라우저 저장소 사용</h2>
+  <p>
+    휴가요정은 쿠키 대신 브라우저 저장소(localStorage·sessionStorage)에 입력한 설정, 로그인 상태,
+    무작위 방문자 ID를 저장합니다. 브라우저 설정에서 사이트 데이터를 삭제하면 모두 지워집니다.
+    이 방침은 광고나 외부 분석 도구를 도입하면 그 내용을 반영해 갱신합니다.
+  </p>
+
+  <h2>6. 이용자의 권리</h2>
+  <p>
+    회원은 언제든지 자신의 정보에 대한 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다.
+    요청은 아래 문의처로 보내 주세요.
+  </p>
+
+  <h2>7. 문의처</h2>
+  <p>
+    개인정보와 관련한 문의·요청:
+    <a href="https://github.com/yoala25/vaca/issues" rel="noopener noreferrer" target="_blank">github.com/yoala25/vaca/issues</a>
+  </p>
+
+  <h2>8. 방침의 변경</h2>
+  <p>이 방침이 바뀌면 시행일과 함께 이 페이지에 공지합니다.</p>
+
+  <footer>© 휴가요정</footer>
+</main>
+</body>
+</html>
