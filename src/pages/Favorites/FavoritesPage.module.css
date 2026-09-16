@@ -3,24 +3,58 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--space-7) var(--space-4);
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4) var(--space-7);
 }
 
+/* 그림 가장자리를 배경에 녹여 네모로 끊기지 않게 한다(다른 화면과 같은 방식). */
 .mascot {
-  width: 140px;
+  width: min(58%, 200px);
+  height: auto;
+  -webkit-mask-image: radial-gradient(
+    ellipse 50% 48% at 50% 47%,
+    #000 50%,
+    rgba(0, 0, 0, 0.5) 78%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 50% 48% at 50% 47%,
+    #000 50%,
+    rgba(0, 0, 0, 0.5) 78%,
+    transparent 100%
+  );
 }
 
-.title {
-  margin-top: var(--space-4);
-  font-size: 15.5px;
+.emptyTitle {
+  font-size: 16.5px;
   font-weight: 800;
   color: var(--text-charcoal);
 }
 
-.desc {
-  margin-top: 6px;
+.emptyDesc {
+  max-width: 320px;
   font-size: 13px;
+  line-height: 1.6;
   color: var(--text-muted);
+  /* 한글이 단어 중간에서 끊기지 않게 한다 */
+  word-break: keep-all;
+}
+
+.emptyCta {
+  margin-top: var(--space-4);
+  min-height: 44px;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--color-teal-dark);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emptyCta:hover {
+  background: var(--color-teal);
 }
 
 .list {

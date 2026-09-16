@@ -49,8 +49,24 @@
   margin: var(--space-5) 0;
 }
 
+/*
+ * 이 그림(sloth-hammock)은 아래쪽이 잘린 채 저장돼 있어 네모로 뚝 끊겨 보인다.
+ * 시안의 구성은 그대로 두고 가장자리만 배경에 녹인다.
+ */
 .mascot {
   width: min(100%, 340px);
+  -webkit-mask-image: radial-gradient(
+    ellipse 52% 60% at 50% 50%,
+    #000 55%,
+    rgba(0, 0, 0, 0.5) 80%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 52% 60% at 50% 50%,
+    #000 55%,
+    rgba(0, 0, 0, 0.5) 80%,
+    transparent 100%
+  );
 }
 
 .cta {
