@@ -18,7 +18,7 @@ export function MobileTopBar() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, isSignedIn } = useAuth();
-  const { needsLeavePrompt, planReady } = usePlanner();
+  const { needsLeavePrompt } = usePlanner();
   const barRef = useRef<HTMLElement>(null);
 
   /*
@@ -43,7 +43,7 @@ export function MobileTopBar() {
   }, []);
 
   // 되돌아갈 계산 결과가 있을 때만 보여 준다. 질문 페이지에서는 의미가 없으므로 숨긴다.
-  const canRecalculate = planReady && !needsLeavePrompt && pathname !== "/start";
+  const canRecalculate = !needsLeavePrompt && pathname !== "/start";
   const accountLabel = isSignedIn && user ? `${user.displayName}님` : "로그인";
 
   const recalculate = () => {

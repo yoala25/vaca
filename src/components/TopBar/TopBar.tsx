@@ -11,10 +11,10 @@ export function TopBar() {
   const { user, isSignedIn } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { needsLeavePrompt, planReady } = usePlanner();
+  const { needsLeavePrompt } = usePlanner();
 
   // 되돌아갈 계산 결과가 있을 때만 보여 준다(질문 페이지에서는 숨김).
-  const canRecalculate = planReady && !needsLeavePrompt && pathname !== "/start";
+  const canRecalculate = !needsLeavePrompt && pathname !== "/start";
 
   return (
     <div className={styles.bar}>

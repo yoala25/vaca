@@ -56,11 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return;
     let active = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setUser(data.session?.user ? toAuthUser(data.session.user) : null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        setUser(data.session?.user ? toAuthUser(data.session.user) : null);
+        setLoading(false);
+      })
+      .catch(() => {
+        // 네트워크가 끊겼거나 서버가 응답하지 않아도 "확인 중"에 갇히지 않는다.
+        // 로그인만 안 된 상태로 두고 앱은 그대로 쓰게 한다.
+        if (active) setLoading(false);
+      });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ? toAuthUser(session.user) : null);
