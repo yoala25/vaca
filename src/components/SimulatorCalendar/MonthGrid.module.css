@@ -214,3 +214,11 @@
     opacity: 1;
   }
 }
+
+/*
+ * "오늘이 있는 달로 이동"처럼 특정 달로 스크롤할 때,
+ * 화면 위에 고정된 전략 버튼 뒤로 숨지 않도록 여백을 둔다.
+ */
+.month {
+  scroll-margin-top: calc(var(--sticky-top, 0px) + 116px);
+}

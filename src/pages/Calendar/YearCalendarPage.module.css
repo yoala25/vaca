@@ -79,3 +79,143 @@
 .chipMeta {
   color: var(--text-muted);
 }
+
+/* ── 전략 버튼: 스크롤해도 달력 위에 붙어 있다 ──
+ * 달을 훑어보면서 전략을 바꿔 "지금 보는 달"의 변화를 비교하는 화면이라
+ * 버튼이 화면에서 사라지면 안 된다. --sticky-top 은 모바일 상단바 높이다.
+ */
+.strategyBar {
+  position: sticky;
+  top: var(--sticky-top, 0px);
+  z-index: 20;
+  margin-block: calc(-1 * var(--space-2));
+  padding-block: var(--space-2);
+  background: var(--bg-page);
+}
+
+.strategyDescription {
+  margin-top: var(--space-3);
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 767px) {
+  .strategyDescription {
+    margin-top: 6px;
+    padding-inline: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.todayBtn {
+  min-height: 34px;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-teal-light);
+  background: var(--bg-mint-pill);
+  color: var(--color-teal-dark);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* ── 달력에서 고른 휴가 조합 ── */
+
+.selectedBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--color-aqua-pale);
+  box-shadow: var(--shadow-card);
+}
+
+.selectedEmoji {
+  font-size: 26px;
+}
+
+.selectedBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.selectedLabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+}
+
+.selectedHeadline {
+  font-size: 15.5px;
+  font-weight: 800;
+  color: var(--text-charcoal);
+  margin-top: 2px;
+}
+
+.selectedRange {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.saveBtn {
+  flex: none;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-teal-dark);
+  background: var(--bg-card);
+  color: var(--color-teal-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.saveBtnActive {
+  background: var(--color-teal-dark);
+  color: #fff;
+}
+
+/* ── 직접 손댄 내용 되돌리기 ── */
+
+.editRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.clearBtn {
+  padding: 10px;
+  min-height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.warn {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-coral);
+}
+
+.chip {
+  cursor: pointer;
+  text-align: left;
+}
+
+.chipActive {
+  border-color: var(--color-teal-dark);
+  background: var(--bg-selected-menu);
+}
+
+.savedHint {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}

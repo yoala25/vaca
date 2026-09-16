@@ -47,7 +47,8 @@ export function MonthGrid({
   const cells = eachDayInRange(gridStart, addDays(gridStart, 41));
 
   return (
-    <div className={`${styles.month} ${compact ? styles.compact : ""}`}>
+    // data-month 는 "오늘이 있는 달로 이동" 같은 스크롤 대상 앵커다.
+    <div className={`${styles.month} ${compact ? styles.compact : ""}`} data-month={`${year}-${month}`}>
       <p className={styles.monthTitle}>{month}월</p>
 
       <div className={styles.grid}>

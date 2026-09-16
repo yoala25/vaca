@@ -89,45 +89,6 @@
   text-decoration: underline;
 }
 
-.clearBtn {
-  width: 100%;
-  margin-top: var(--space-3);
-  padding: 10px;
-  min-height: 40px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  background: #fff;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.warn {
-  margin-top: var(--space-2);
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-coral);
-}
-
-.layout {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.calendarCol {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.sideCol {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 @media (min-width: 1200px) {
   .layout {
     flex-direction: row;
@@ -146,189 +107,11 @@
   }
 }
 
-/* 달력 아래 선택 결과 바 */
-.resultBar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #eaf6f7 0%, #f3ead8 100%);
-  border: 1px solid var(--border-subtle);
-}
-
-.resultEmoji {
-  font-size: 30px;
-  flex: none;
-}
-
-.resultBody {
-  flex: 1;
-  min-width: 0;
-}
-
-.resultLabel {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text-charcoal-soft);
-}
-
-.resultHeadline {
-  margin-top: 2px;
-  font-size: clamp(17px, 2vw, 21px);
-  font-weight: 800;
-  color: var(--color-teal-dark);
-}
-
-.resultRange {
-  margin-top: 4px;
-  font-size: 12.5px;
-  color: var(--text-muted);
-}
-
-.saveBtn {
-  flex: none;
-  padding: 11px 18px;
-  min-height: 44px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid var(--color-teal-dark);
-  background: #fff;
-  color: var(--color-teal-dark);
-  font-size: 13.5px;
-  font-weight: 700;
-}
-
-.saveBtnActive {
-  background: var(--color-teal-dark);
-  color: #fff;
-}
-
-/* 우측 요약 */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-card);
-}
-
-.cardTitle {
-  font-size: 14.5px;
-  font-weight: 800;
-  color: var(--text-charcoal);
-  margin-bottom: var(--space-3);
-}
-
-.summaryRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.summaryRow:last-of-type {
-  border-bottom: none;
-}
-
-.summaryValue {
-  font-weight: 800;
-  color: var(--text-charcoal);
-  font-size: 14.5px;
-}
-
-.summaryHighlight {
-  color: var(--color-teal-dark);
-  font-size: 17px;
-}
-
-.blockList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.blockItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  padding: 11px var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-subtle);
-  background: var(--bg-card);
-  text-align: left;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-
 @media (hover: hover) {
   .blockItem:hover {
     border-color: var(--color-teal-light);
     transform: translateY(-1px);
   }
-}
-
-.blockItemActive {
-  border-color: var(--color-teal);
-  background: var(--bg-mint-pill);
-}
-
-.blockEmoji {
-  font-size: 20px;
-  flex: none;
-}
-
-.blockBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.blockLabel {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text-charcoal);
-}
-
-.blockMeta {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
-
-.blockRest {
-  flex: none;
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--color-teal-dark);
-}
-
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-3);
-  padding: var(--space-6) var(--space-4);
-}
-
-.emptyMascot {
-  width: 130px;
-}
-
-.emptyText {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-charcoal);
-}
-
-.emptyHint {
-  font-size: 12.5px;
-  color: var(--text-muted);
 }
 
 .notice {
@@ -338,41 +121,6 @@
   border: 1px solid var(--card-yellow-border);
   font-size: 12.5px;
   color: var(--text-charcoal-soft);
-}
-
-.policyLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: var(--space-2);
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--color-teal-dark);
-  text-decoration: underline;
-}
-
-/* ── ① 전략 버튼 영역 ─────────────────────────────────────────────
- * 모바일·태블릿에서는 스크롤해도 화면 위(상단바 바로 아래)에 붙어 있어서
- * 달력을 내려 보면서도 장기 집중/수시 휴가/연차 절약을 바로 눌러 비교할 수 있다.
- * --sticky-top 은 AppShell 이 상단바 높이만큼 정해 준다(상단바가 없으면 0).
- */
-.strategyBar {
-  position: sticky;
-  top: var(--sticky-top, 0px);
-  z-index: 20;
-  margin-block: calc(-1 * var(--space-2));
-  padding-block: var(--space-2);
-  background: var(--bg-page);
-}
-
-/* 전략 설명. 버튼과 같은 고정 영역 안에 있어 스크롤해도 함께 보인다. */
-.strategyDescription {
-  margin-top: var(--space-3);
-  font-size: 13.5px;
-  color: var(--text-muted);
 }
 
 /* 로그인 확인·계정 저장본을 기다리는 동안 자리만 잡아 둔다(질문 페이지 깜빡임 방지) */
@@ -393,11 +141,6 @@
   }
 }
 
-/* 달력으로 스크롤해 올릴 때 고정된 버튼 뒤로 숨지 않게 여백을 둔다 */
-.layout {
-  scroll-margin-top: calc(var(--sticky-top, 0px) + 72px);
-}
-
 @media (min-width: 1200px) {
   /* PC는 4개월이 한 화면에 들어오므로 고정할 필요가 없다 */
   .strategyBar {
@@ -410,4 +153,56 @@
   .layout {
     scroll-margin-top: var(--space-4);
   }
+}
+
+/* ── 달력 보기로 넘어가는 큰 버튼 ──
+ * 요약을 다 읽은 다음 자연스럽게 이어지는 다음 행동이라 눈에 띄게 둔다.
+ */
+.calendarCta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-5) var(--space-4);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-teal-dark);
+  color: #fff;
+  text-align: left;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+
+.calendarCta:hover {
+  background: var(--color-teal);
+}
+
+.calendarCtaIcon {
+  font-size: 30px;
+  flex: none;
+}
+
+.calendarCtaBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.calendarCtaTitle {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.calendarCtaDesc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.calendarCtaArrow {
+  font-size: 22px;
+  flex: none;
+  color: rgba(255, 255, 255, 0.8);
 }

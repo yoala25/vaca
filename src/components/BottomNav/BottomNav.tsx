@@ -3,7 +3,7 @@ import styles from "./BottomNav.module.css";
 
 const ITEMS = [
   { to: "/", icon: "🗓️", label: "휴가설계", end: true },
-  { to: "/calendar", icon: "📅", label: "전체" },
+  { to: "/calendar", icon: "📅", label: "달력보기" },
   { to: "/favorites", icon: "♡", label: "찜한휴가" },
   { to: "/settings", icon: "🦥", label: "MY" },
 ];

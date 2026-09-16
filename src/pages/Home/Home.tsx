@@ -3,10 +3,6 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Home.module.css";
 import { StartPanel } from "./StartPanel";
 import { usePlanner } from "../../state/PlannerContext";
-import { MultiMonthCalendar } from "../../components/SimulatorCalendar/MultiMonthCalendar";
-import { StrategyTabs, STRATEGY_TABS } from "../../components/StrategyTabs/StrategyTabs";
-import { useWorkingWeekday } from "../../lib/useWorkingWeekday";
-import { slothHammock } from "../../assets/mascot";
 import { describeLeaveExpiry } from "../../data/companyPolicy";
 import { MascotMessage } from "../../features/highlights/MascotMessage";
 import { track } from "../../features/analytics";
@@ -28,86 +24,38 @@ import {
   type MonthRadar,
 } from "../../features/highlights/monthlyVacationRadar";
 import { moodForScore, pickMascotMessage } from "../../features/highlights/mascotMessages";
-import {
-  HolidayDataStatus,
-  formatDateRange,
-  localDate,
-  toCivil,
-  type LocalDate,
-  type VacationOverlayRange,
-} from "../../domain/vacation";
+import { HolidayDataStatus, type LocalDate } from "../../domain/vacation";
 
-/** 기본 달력은 4개월을 한 번에 보여준다(휴가 설계는 한 달 단위로는 판단이 안 되므로). */
-const DEFAULT_MONTH_COUNT = 4;
-
-function maxDate(a: LocalDate, b: LocalDate): LocalDate {
-  return a >= b ? a : b;
-}
-
-function startOfMonth(date: LocalDate): LocalDate {
-  const { year, month } = toCivil(date);
-  return localDate(year, month, 1);
-}
-
+/**
+ * 휴가 설계 첫 화면.
+ *
+ * "올해 어떻게 쉴 수 있는지"를 요약해서 보여 주고,
+ * 날짜를 직접 보고 만지는 일은 달력 보기 화면(/calendar)으로 넘긴다.
+ * 요약과 달력을 한 화면에 같이 두면 모바일에서 둘 다 제대로 보이지 않는다.
+ */
 export function Home() {
   const navigate = useNavigate();
-  const planner = usePlanner();
   const {
     needsLeavePrompt,
     planReady,
     strategy,
-    setStrategy,
     remainingLeaveDays,
     totalLeaveDays: totalLeave,
-    availableLeaveDays,
     setRemainingLeaveDays,
     result,
     today,
-    leaveExpiryDate,
-    manualLeaveDates,
-    toggleManualLeaveDate,
-    clearManualLeaveDates,
-    excludedDates,
-    excludeDate,
-    clearExcludedDates,
     savedRanges,
     toggleSavedRange,
-    isRangeSaved,
     companyPolicy,
     selectedYear,
     currentYear,
     isFutureYear,
     leaveEntryType,
     needsLeaveInput,
-  } = planner;
+  } = usePlanner();
 
   const ranges = result.calendarOverlay.ranges;
-  const isWorkingWeekday = useWorkingWeekday();
-  const [startMonth, setStartMonth] = useState<LocalDate>(() => startOfMonth(today));
-  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [walletOpen, setWalletOpen] = useState(false);
-
-  /*
-   * 전략을 바꿀 때만 첫 추천이 있는 달로 달력을 옮긴다.
-   * ranges가 바뀔 때마다 옮기면, 사용자가 날짜를 눌러 휴가를 추가/취소하는 순간
-   * 보고 있던 달이 튀어 버리고 방금 누른 칸도 사라진다.
-   */
-  useEffect(() => {
-    const first = ranges[0];
-    setSelectedId(first?.candidateId);
-    if (first) {
-      setStartMonth(startOfMonth(first.startDate));
-    } else {
-      // 추천이 없어도 달력은 선택한 연도 안에 머물러야 한다.
-      setStartMonth(startOfMonth(maxDate(localDate(selectedYear, 1, 1), today)));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [strategy, selectedYear]);
-
-  const selected = useMemo(
-    () => ranges.find((range) => range.candidateId === selectedId) ?? ranges[0],
-    [ranges, selectedId],
-  );
 
   /*
    * TOP3 · 효율점수 · 레이더는 모두 엔진이 이미 만든 후보 풀(rankedCandidates)에서 파생된다.
@@ -118,10 +66,9 @@ export function Home() {
     [result.rankedCandidates],
   );
   const topChances = useMemo(() => pickTopChances(scoredEntries), [scoredEntries]);
-  const radarYear = selectedYear;
   const radar = useMemo(
-    () => annotateHighlights(buildMonthlyRadar(scoredEntries, radarYear)),
-    [scoredEntries, radarYear],
+    () => annotateHighlights(buildMonthlyRadar(scoredEntries, selectedYear)),
+    [scoredEntries, selectedYear],
   );
 
   const bestScore = topChances[0]?.score.score ?? 0;
@@ -173,18 +120,14 @@ export function Home() {
     result.summary.totalRestDays,
   ]);
 
-  /*
-   * 연도 탭은 달력 아래에 있다. 연도를 바꾸면 바뀐 달력이 바로 보이도록 맨 위로 올린다.
-   * 첫 렌더(주소의 ?year= 로 열린 경우)에는 움직이지 않는다.
-   */
-  const strategyBarRef = useRef<HTMLDivElement>(null);
-
   const [waitedForPlan, setWaitedForPlan] = useState(false);
   useEffect(() => {
     if (planReady) return;
     const timer = window.setTimeout(() => setWaitedForPlan(true), 2500);
     return () => window.clearTimeout(timer);
   }, [planReady]);
+
+  // 연도를 바꾸면 바뀐 요약이 바로 보이도록 맨 위로 올린다(첫 렌더에는 움직이지 않는다).
   const previousYear = useRef(selectedYear);
   useEffect(() => {
     if (previousYear.current === selectedYear) return;
@@ -199,21 +142,9 @@ export function Home() {
   if (!planReady && !waitedForPlan) return <div className={styles.planLoading} aria-busy="true" />;
   if (needsLeavePrompt) return <StartPanel />;
 
-  const handleSelect = (range: VacationOverlayRange) => {
-    setSelectedId(range.candidateId);
-    setStartMonth(startOfMonth(range.startDate));
-  };
-
-  /** TOP3 카드나 레이더에서 고른 날짜로 달력을 이동시킨다. */
-  const focusDate = (date: LocalDate) => {
-    setStartMonth(startOfMonth(date));
-    document.getElementById("vacation-calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const openChance = (chance: VacationChance) => {
-    const matching = ranges.find((range) => range.candidateId === chance.candidate.id);
-    if (matching) setSelectedId(matching.candidateId);
-    focusDate(chance.candidate.startDate);
+  /** 달력 보기로 넘어간다. 날짜를 주면 그 달이 먼저 보이게 한다. */
+  const openCalendar = (focusDate?: LocalDate) => {
+    navigate("/calendar", focusDate ? { state: { focusDate } } : undefined);
   };
 
   const chanceSaved = (chance: VacationChance) =>
@@ -251,220 +182,18 @@ export function Home() {
   };
 
   const openMonth = (month: MonthRadar) => {
-    if (!month.best) return;
-    const matching = ranges.find((range) => range.candidateId === month.best?.id);
-    if (matching) setSelectedId(matching.candidateId);
-    focusDate(month.best.startDate);
+    if (month.best) openCalendar(month.best.startDate);
   };
-
-
-  /**
-   * 전략 변경. 모바일에서 달력을 내려 보다가 버튼을 눌렀다면
-   * 바뀐 결과가 보이도록 달력 첫 달을 고정된 버튼 바로 아래로 올려 준다.
-   */
-  const changeStrategy = (next: typeof strategy) => {
-    setStrategy(next);
-    track("vacation_style_select", { targetYear: selectedYear, vacationStyle: next });
-
-    const calendar = document.getElementById("vacation-calendar");
-    const barBottom = strategyBarRef.current?.getBoundingClientRect().bottom ?? 0;
-    if (calendar && calendar.getBoundingClientRect().top < barBottom) {
-      calendar.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  const strategyDescription =
-    STRATEGY_TABS.find((tab) => tab.id === strategy)?.description ?? "";
-
-  const manualLeaveCount = manualLeaveDates.length;
-  const budgetExceeded = availableLeaveDays === 0 && manualLeaveCount > 0;
 
   return (
     <div className={styles.page}>
+      <YearBar onToggleWallet={() => setWalletOpen((open) => !open)} />
+      {walletOpen && <LeaveWalletPanel />}
+
       {needsLeaveInput ? (
-        /* 연차를 아직 모르는 미래 연도는 달력 대신 입력부터 받는다 */
-        <>
-          <YearBar onToggleWallet={() => setWalletOpen((open) => !open)} />
-          {walletOpen && <LeaveWalletPanel />}
-          <FutureYearSetup />
-        </>
+        <FutureYearSetup />
       ) : (
         <>
-          {/*
-            ① 전략 버튼. 모바일에서는 스크롤해도 화면 위에 붙어 있어서
-            달력을 보면서 바로 눌러 비교할 수 있다.
-          */}
-          <div className={styles.strategyBar} ref={strategyBarRef}>
-            <StrategyTabs value={strategy} onChange={changeStrategy} hideDescription />
-            <p className={styles.strategyDescription}>{strategyDescription}</p>
-          </div>
-
-          {/* ② 달력(휴가 배치). 전략을 바꾸면 여기가 바로 달라진다 */}
-          <div className={styles.layout} id="vacation-calendar">
-            <div className={styles.calendarCol}>
-              <MultiMonthCalendar
-                startMonth={startMonth}
-                monthCount={DEFAULT_MONTH_COUNT}
-                onStartMonthChange={setStartMonth}
-                ranges={ranges}
-                manualLeaveDates={manualLeaveDates}
-                selectedCandidateId={selected?.candidateId}
-                onSelectRange={handleSelect}
-                onToggleManualDate={toggleManualLeaveDate}
-                onExcludeDate={excludeDate}
-                today={today}
-                isWorkingWeekday={isWorkingWeekday}
-                leaveExpiryDate={leaveExpiryDate}
-                title={`${toCivil(startMonth).year}년 휴가 배치`}
-                onOpenYearView={() => navigate("/calendar")}
-                yearViewLabel={`${selectedYear}년 전체보기`}
-              />
-
-              {selected && (
-                <div className={styles.resultBar}>
-                  <span className={styles.resultEmoji}>{selected.emoji}</span>
-                  <div className={styles.resultBody}>
-                    <p className={styles.resultLabel}>{selected.label}</p>
-                    <p className={styles.resultHeadline}>{selected.headline}</p>
-                    <p className={styles.resultRange}>
-                      {formatDateRange(selected.startDate, selected.endDate)} · 휴가효율{" "}
-                      {selected.efficiency}x
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className={`${styles.saveBtn} ${
-                      isRangeSaved(selected.candidateId) ? styles.saveBtnActive : ""
-                    }`}
-                    onClick={() => {
-                      toggleSavedRange(selected);
-                      if (!isRangeSaved(selected.candidateId)) {
-                        track("save_combination", {
-                          targetYear: selectedYear,
-                          leaveDays: selected.leaveUsedDays,
-                          resultDays: selected.totalRestDays,
-                          vacationStyle: strategy,
-                        });
-                      }
-                    }}
-                  >
-                    {isRangeSaved(selected.candidateId) ? "저장됨 ♥" : "이 조합 저장"}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <aside className={styles.sideCol}>
-              <section className={styles.card}>
-                <p className={styles.cardTitle}>이 전략의 결과</p>
-                <div className={styles.summaryRow}>
-                  <span>추천 연차</span>
-                  <span className={styles.summaryValue}>{result.summary.leaveDaysUsed}일</span>
-                </div>
-                {manualLeaveCount > 0 && (
-                  <div className={styles.summaryRow}>
-                    <span>직접 추가</span>
-                    <span className={styles.summaryValue}>{manualLeaveCount}일</span>
-                  </div>
-                )}
-                <div className={styles.summaryRow}>
-                  <span>총 휴식</span>
-                  <span className={`${styles.summaryValue} ${styles.summaryHighlight}`}>
-                    {result.summary.totalRestDays}일
-                  </span>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>휴가 효율</span>
-                  <span className={styles.summaryValue}>{result.summary.efficiency}x</span>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>남는 연차</span>
-                  <span className={styles.summaryValue}>
-                    {Math.round(
-                      (result.summary.remainingLeaveMinutes / companyPolicy.dailyWorkMinutes) * 10,
-                    ) / 10}
-                    일
-                  </span>
-                </div>
-
-                {manualLeaveCount > 0 && (
-                  <button type="button" className={styles.clearBtn} onClick={clearManualLeaveDates}>
-                    직접 추가한 휴가 {manualLeaveCount}일 모두 지우기
-                  </button>
-                )}
-                {excludedDates.length > 0 && (
-                  <button type="button" className={styles.clearBtn} onClick={clearExcludedDates}>
-                    취소한 추천 {excludedDates.length}일 되살리기
-                  </button>
-                )}
-                {budgetExceeded && (
-                  <p className={styles.warn}>
-                    직접 추가한 휴가가 남은 연차를 모두 사용했어요. 추천을 보려면 일부를 지워주세요.
-                  </p>
-                )}
-              </section>
-
-              <section className={styles.card}>
-                <p className={styles.cardTitle}>
-                  추천 조합 {ranges.length > 0 && `(${ranges.length})`}
-                </p>
-                {ranges.length === 0 ? (
-                  <div className={styles.empty}>
-                    <img className={styles.emptyMascot} src={slothHammock} alt="" />
-                    <p className={styles.emptyText}>추천할 조합이 없어요</p>
-                    <p className={styles.emptyHint}>
-                      남은 연차를 1일 이상으로 입력하거나, 연차 소멸일을 확인해 주세요.
-                    </p>
-                  </div>
-                ) : (
-                  <div className={styles.blockList}>
-                    {ranges.map((range) => (
-                      <button
-                        key={range.candidateId}
-                        type="button"
-                        className={`${styles.blockItem} ${
-                          range.candidateId === selected?.candidateId ? styles.blockItemActive : ""
-                        }`}
-                        onClick={() => handleSelect(range)}
-                      >
-                        <span className={styles.blockEmoji}>{range.emoji}</span>
-                        <span className={styles.blockBody}>
-                          <span className={styles.blockLabel}>{range.label}</span>
-                          <span className={styles.blockMeta}>
-                            {formatDateRange(range.startDate, range.endDate)} ·{" "}
-                            {/* 리프레시휴가는 연차를 쓰지 않으므로 이름을 그대로 보여준다. */}
-                            {range.specialLeaveUsedDays > 0
-                              ? `${range.specialLeaveName ?? "특별휴가"} ${range.specialLeaveUsedDays}일`
-                              : `연차 ${range.leaveUsedDays}일`}
-                          </span>
-                        </span>
-                        <span className={styles.blockRest}>{range.totalRestDays}일</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  className={styles.policyLink}
-                  onClick={() => navigate("/company")}
-                >
-                  회사 휴가제도 반영하기 ›
-                </button>
-              </section>
-            </aside>
-          </div>
-
-          {result.summary.holidayDataStatus !== HolidayDataStatus.Official && (
-            <p className={styles.notice}>
-              일부 기간은 공휴일 일정이 확정되지 않았어요. 확정 후 추천이 바뀔 수 있어요.
-            </p>
-          )}
-
-          {/* ③ 나머지: 연도·연차 설정, 휴가요정 안내, TOP3, 레이더 */}
-          <YearBar onToggleWallet={() => setWalletOpen((open) => !open)} />
-          {walletOpen && <LeaveWalletPanel />}
-
           <div className={styles.greeting}>
             <div>
               <p className={styles.hello}>안녕하세요 👋</p>
@@ -521,23 +250,40 @@ export function Home() {
             )}
           </p>
 
+          {result.summary.holidayDataStatus !== HolidayDataStatus.Official && (
+            <p className={styles.notice}>
+              일부 기간은 공휴일 일정이 확정되지 않았어요. 확정 후 추천이 바뀔 수 있어요.
+            </p>
+          )}
+
           <MascotMessage text={mascotText} />
 
           <TopChances
             chances={topChances}
             year={selectedYear}
             currentYear={currentYear}
-            onOpen={openChance}
+            onOpen={(chance) => openCalendar(chance.candidate.startDate)}
             onToggleSave={toggleChanceSave}
             isSaved={chanceSaved}
           />
 
-          <VacationRadar
-            radar={radar}
-            year={radarYear}
-            selectedMonth={selected ? toCivil(selected.startDate).month : undefined}
-            onSelectMonth={openMonth}
-          />
+          <VacationRadar radar={radar} year={selectedYear} onSelectMonth={openMonth} />
+
+          {/* 날짜를 직접 보고 만지는 일은 여기서 달력 보기로 넘긴다 */}
+          <button type="button" className={styles.calendarCta} onClick={() => openCalendar()}>
+            <span className={styles.calendarCtaIcon} aria-hidden>
+              📅
+            </span>
+            <span className={styles.calendarCtaBody}>
+              <span className={styles.calendarCtaTitle}>달력 보기</span>
+              <span className={styles.calendarCtaDesc}>
+                {selectedYear}년 달력에서 휴가 배치를 확인하고 직접 바꿔 보세요
+              </span>
+            </span>
+            <span className={styles.calendarCtaArrow} aria-hidden>
+              ›
+            </span>
+          </button>
 
           {selectedYear === currentYear && <NextYearCta />}
         </>

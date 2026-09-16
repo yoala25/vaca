@@ -4,7 +4,7 @@ import { appIcon, slothBeach } from "../../assets/mascot";
 
 const NAV_ITEMS = [
   { to: "/", icon: "🗓️", label: "휴가 설계", end: true },
-  { to: "/calendar", icon: "📅", label: "전체 캘린더" },
+  { to: "/calendar", icon: "📅", label: "달력 보기" },
   { to: "/favorites", icon: "♡", label: "찜한 휴가" },
   { to: "/company", icon: "🏢", label: "회사 휴가제도" },
 ];
