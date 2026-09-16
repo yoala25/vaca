@@ -368,10 +368,29 @@
   background: var(--bg-page);
 }
 
+/* 전략 설명. 버튼과 같은 고정 영역 안에 있어 스크롤해도 함께 보인다. */
 .strategyDescription {
-  margin-top: calc(-1 * var(--space-3));
+  margin-top: var(--space-3);
   font-size: 13.5px;
   color: var(--text-muted);
+}
+
+/* 로그인 확인·계정 저장본을 기다리는 동안 자리만 잡아 둔다(질문 페이지 깜빡임 방지) */
+.planLoading {
+  min-height: 60vh;
+}
+
+@media (max-width: 767px) {
+  /* 모바일: 달력을 가리지 않도록 작게 한 줄로. 넘치면 말줄임 */
+  .strategyDescription {
+    margin-top: 6px;
+    padding-inline: 2px;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* 달력으로 스크롤해 올릴 때 고정된 버튼 뒤로 숨지 않게 여백을 둔다 */

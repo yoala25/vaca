@@ -53,7 +53,8 @@ export function Home() {
   const navigate = useNavigate();
   const planner = usePlanner();
   const {
-    hasCalculated,
+    needsLeavePrompt,
+    planReady,
     strategy,
     setStrategy,
     remainingLeaveDays,
@@ -151,7 +152,7 @@ export function Home() {
    * 전송 실패는 무시되며 휴가 계산에는 어떤 영향도 주지 않는다.
    */
   useEffect(() => {
-    if (!hasCalculated || needsLeaveInput || remainingLeaveDays <= 0) return;
+    if (!planReady || needsLeavePrompt || needsLeaveInput || remainingLeaveDays <= 0) return;
     const timer = window.setTimeout(() => {
       track("simulation_complete", {
         targetYear: selectedYear,
@@ -163,7 +164,8 @@ export function Home() {
     }, 1200);
     return () => window.clearTimeout(timer);
   }, [
-    hasCalculated,
+    planReady,
+    needsLeavePrompt,
     needsLeaveInput,
     selectedYear,
     remainingLeaveDays,
@@ -176,6 +178,13 @@ export function Home() {
    * 첫 렌더(주소의 ?year= 로 열린 경우)에는 움직이지 않는다.
    */
   const strategyBarRef = useRef<HTMLDivElement>(null);
+
+  const [waitedForPlan, setWaitedForPlan] = useState(false);
+  useEffect(() => {
+    if (planReady) return;
+    const timer = window.setTimeout(() => setWaitedForPlan(true), 2500);
+    return () => window.clearTimeout(timer);
+  }, [planReady]);
   const previousYear = useRef(selectedYear);
   useEffect(() => {
     if (previousYear.current === selectedYear) return;
@@ -183,7 +192,12 @@ export function Home() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [selectedYear]);
 
-  if (!hasCalculated) return <StartPanel />;
+  /*
+   * 로그인 확인·계정 저장본을 기다리는 동안에는 질문도 결과도 그리지 않는다.
+   * 네트워크가 느려 오래 걸리면 2.5초 뒤에는 있는 정보로 판단한다.
+   */
+  if (!planReady && !waitedForPlan) return <div className={styles.planLoading} aria-busy="true" />;
+  if (needsLeavePrompt) return <StartPanel />;
 
   const handleSelect = (range: VacationOverlayRange) => {
     setSelectedId(range.candidateId);
@@ -282,8 +296,8 @@ export function Home() {
           */}
           <div className={styles.strategyBar} ref={strategyBarRef}>
             <StrategyTabs value={strategy} onChange={changeStrategy} hideDescription />
+            <p className={styles.strategyDescription}>{strategyDescription}</p>
           </div>
-          <p className={styles.strategyDescription}>{strategyDescription}</p>
 
           {/* ② 달력(휴가 배치). 전략을 바꾸면 여기가 바로 달라진다 */}
           <div className={styles.layout} id="vacation-calendar">

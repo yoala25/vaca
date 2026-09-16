@@ -1,19 +1,24 @@
 import { useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import styles from "./MobileTopBar.module.css";
 import { appIcon } from "../../assets/mascot";
+import { useAuth } from "../../features/auth/AuthContext";
+import { usePlanner } from "../../state/PlannerContext";
+import { track } from "../../features/analytics";
 
 /**
- * 모바일에는 좌측 사이드바를 두지 않는다.
- * 자주 쓰는 메뉴는 하단 탭에, 나머지는 이 상단바의 아이콘으로 배치한다.
+ * 모바일 상단바.
+ *
+ * 아이콘만으로는 무엇인지 알아보기 어려워서 글자 버튼으로 둔다.
+ * - 다시 계산: 계산 결과가 있을 때만 보인다. 누르면 연차 질문(/start)으로 간다.
+ * - 우리회사: 회사 휴가제도 설정
+ * - 로그인 / 닉네임: 계정 화면(MY). 로그인하면 닉네임이 보인다.
  */
-const TOP_ACTIONS = [
-  { to: "/company", icon: "🏢", label: "회사 휴가제도" },
-  { to: "/settings", icon: "⚙", label: "설정" },
-];
-
 export function MobileTopBar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { user, isSignedIn } = useAuth();
+  const { needsLeavePrompt, planReady } = usePlanner();
   const barRef = useRef<HTMLElement>(null);
 
   /*
@@ -37,6 +42,15 @@ export function MobileTopBar() {
     };
   }, []);
 
+  // 되돌아갈 계산 결과가 있을 때만 보여 준다. 질문 페이지에서는 의미가 없으므로 숨긴다.
+  const canRecalculate = planReady && !needsLeavePrompt && pathname !== "/start";
+  const accountLabel = isSignedIn && user ? `${user.displayName}님` : "로그인";
+
+  const recalculate = () => {
+    track("retry_simulation");
+    navigate("/start");
+  };
+
   return (
     <header className={styles.bar} ref={barRef}>
       <button type="button" className={styles.brand} onClick={() => navigate("/")}>
@@ -46,20 +60,28 @@ export function MobileTopBar() {
         <span className={styles.brandName}>휴가요정</span>
       </button>
 
-      <nav className={styles.actions}>
-        {TOP_ACTIONS.map((action) => (
-          <NavLink
-            key={action.to}
-            to={action.to}
-            className={({ isActive }) =>
-              `${styles.iconBtn} ${isActive ? styles.iconBtnActive : ""}`
-            }
-            aria-label={action.label}
-            title={action.label}
-          >
-            <span aria-hidden>{action.icon}</span>
-          </NavLink>
-        ))}
+      <nav className={styles.actions} aria-label="빠른 메뉴">
+        {canRecalculate && (
+          <button type="button" className={`${styles.pill} ${styles.pillPrimary}`} onClick={recalculate}>
+            <span aria-hidden>↺</span>
+            다시 계산
+          </button>
+        )}
+        <NavLink
+          to="/company"
+          className={({ isActive }) => `${styles.pill} ${isActive ? styles.pillActive : ""}`}
+        >
+          우리회사
+        </NavLink>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `${styles.pill} ${styles.account} ${isActive ? styles.pillActive : ""}`
+          }
+          title={isSignedIn ? "계정 설정" : "로그인 / 회원가입"}
+        >
+          <span className={styles.accountName}>{accountLabel}</span>
+        </NavLink>
       </nav>
     </header>
   );

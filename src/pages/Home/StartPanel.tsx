@@ -47,6 +47,9 @@ export function StartPanel() {
       setLeaveDaysForYear(currentYear, parsed);
     }
     markCalculated();
+    // "다시 계산"(/start)에서 왔든 첫 화면(/)이든 결과 화면으로 간다.
+    // replace 로 이동해 뒤로 가기가 질문 페이지로 되돌아가지 않게 한다.
+    navigate("/", { replace: true });
     // 익명 통계. 실패해도 계산에는 아무 영향이 없다.
     track("leave_input", { targetYear: currentYear, leaveDays: parsed });
     track("simulation_start", { targetYear: currentYear, leaveDays: parsed });

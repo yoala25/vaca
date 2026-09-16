@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import styles from "./BottomNav.module.css";
 
 const ITEMS = [
@@ -9,6 +9,8 @@ const ITEMS = [
 ];
 
 export function BottomNav() {
+  const { pathname } = useLocation();
+
   return (
     <nav className={styles.nav}>
       {ITEMS.map((item) => (
@@ -16,7 +18,10 @@ export function BottomNav() {
           key={item.to}
           to={item.to}
           end={item.end}
-          className={({ isActive }) => `${styles.item} ${isActive ? styles.itemActive : ""}`}
+          className={({ isActive }) =>
+            // "다시 계산"으로 들어온 연차 질문도 휴가설계의 일부로 표시한다.
+            `${styles.item} ${isActive || (item.to === "/" && pathname === "/start") ? styles.itemActive : ""}`
+          }
         >
           <span className={styles.icon}>{item.icon}</span>
           <span>{item.label}</span>

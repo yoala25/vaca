@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { useViewport } from "../lib/useViewport";
 import { Home } from "../pages/Home/Home";
+import { StartPanel } from "../pages/Home/StartPanel";
 import { Splash } from "../pages/Splash/Splash";
 import { Welcome } from "../pages/Welcome/Welcome";
 import { OnboardingStepPage } from "../pages/Onboarding/OnboardingStepPage";
@@ -50,6 +51,8 @@ export function AppRoutes() {
 
       <Route element={<AppShell />}>
         <Route path="/" element={<HomeGate />} />
+        {/* "다시 계산" 버튼의 목적지. 계산하지 않고 나가면 이전 결과가 그대로 남는다. */}
+        <Route path="/start" element={<StartPanel />} />
         <Route path="/calendar" element={<YearCalendarPage />} />
         <Route path="/company" element={<CompanyPolicyPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />

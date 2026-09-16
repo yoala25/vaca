@@ -174,6 +174,19 @@ interface PlannerContextValue {
   manualLeaveDates: LocalDate[];
   excludedDates: LocalDate[];
   hasCalculated: boolean;
+  /**
+   * 휴가설계(/)에서 연차 질문부터 보여줘야 하는가.
+   * - 이 탭에서 이미 계산했으면 묻지 않는다.
+   * - 로그인했고 올해 연차가 저장돼 있으면 묻지 않는다(다시 계산은 버튼으로 한다).
+   * - 그 밖(비로그인 새 접속 등)에는 묻는다.
+   */
+  needsLeavePrompt: boolean;
+  /**
+   * 로그인 확인과 계정 저장본 불러오기가 끝났는가.
+   * 끝나기 전에 판단하면 로그인 사용자에게 질문 페이지가 잠깐 번쩍 보이므로,
+   * 화면은 이 값이 true 가 된 뒤에 결정한다.
+   */
+  planReady: boolean;
   onboardingComplete: boolean;
 
   /** 보유 연차에서 직접 추가한 휴가를 뺀, 추천에 쓸 수 있는 연차. */
@@ -225,7 +238,7 @@ interface PlannerContextValue {
 const PlannerContext = createContext<PlannerContextValue | null>(null);
 
 export function PlannerProvider({ children }: { children: ReactNode }) {
-  const { user, cloudEnabled } = useAuth();
+  const { user, cloudEnabled, loading: authLoading } = useAuth();
   const userId = user?.id ?? null;
   const storageKey = storageKeyFor(userId);
 
@@ -330,6 +343,18 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
   /** 선택 연도의 연차. 값이 없으면 undefined — 다른 연도 값으로 대체하지 않는다. */
   const leaveDaysForYear = getLeaveDays(state.leaveWallet, selectedYear);
   const hasLeaveForYear = leaveDaysForYear !== undefined;
+
+  /*
+   * 계정 저장본이 아직 오는 중인지.
+   * 로그인 직후에는 storageKey 가 바뀐 렌더에서 효과가 아직 돌지 않았으므로
+   * loadedKeyRef 가 이전 키를 가리키고, 효과가 돈 뒤에는 syncStatus 가 loading 이다.
+   */
+  const accountLoading =
+    userId !== null && (loadedKeyRef.current !== storageKey || syncStatus === "loading");
+  const planReady = !authLoading && !accountLoading;
+
+  const savedCurrentYearLeave = getLeaveDays(state.leaveWallet, currentYear) ?? 0;
+  const needsLeavePrompt = !hasCalculated && !(userId !== null && savedCurrentYearLeave > 0);
 
   /**
    * 연차 소멸일은 선택 연도 기준으로 계산한다.
@@ -438,6 +463,8 @@ export function PlannerProvider({ children }: { children: ReactNode }) {
     manualLeaveDates: state.manualLeaveDates,
     excludedDates: state.excludedDates,
     hasCalculated,
+    needsLeavePrompt,
+    planReady,
     onboardingComplete: state.onboardingComplete,
     availableLeaveDays,
     remainingLeaveDays: companyRemaining,

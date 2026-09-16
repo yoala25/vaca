@@ -45,24 +45,62 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   margin-left: auto;
+  min-width: 0;
 }
 
-/* 최소 44x44 터치 영역 확보 */
-.iconBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
-  background: none;
-  font-size: 18px;
+/* 아이콘 대신 글자로 무엇인지 바로 보이게 한다 */
+.pill {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 11px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 700;
   color: var(--text-charcoal-soft);
+  white-space: nowrap;
+  text-decoration: none;
+  flex: none;
 }
 
-.iconBtnActive {
-  background: var(--bg-selected-menu);
+/* 다시 계산: 가장 자주 쓰는 행동이라 브랜드 색으로 살짝 강조 */
+.pillPrimary {
+  border-color: var(--color-teal-light);
+  background: var(--bg-mint-pill);
+  color: var(--color-teal-dark);
+}
+
+.pillActive {
+  border-color: var(--color-teal-dark);
+  background: var(--color-teal-dark);
+  color: #fff;
+}
+
+/* 닉네임이 길어도 상단바를 밀어내지 않게 자른다 */
+.account {
+  max-width: 104px;
+  flex: 0 1 auto;
+}
+
+.accountName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 아주 좁은 화면(320~374px): 로고 글자를 숨겨 버튼 셋이 한 줄에 들어가게 한다 */
+@media (max-width: 374px) {
+  .brandName {
+    display: none;
+  }
+
+  .pill {
+    padding: 0 9px;
+    font-size: 12.5px;
+  }
 }

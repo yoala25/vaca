@@ -88,3 +88,23 @@
   color: var(--text-muted);
   font-size: 11px;
 }
+
+/* 다시 계산하기: 연차 질문으로 돌아간다. 계산하지 않고 나가면 이전 결과가 남는다. */
+.recalcBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-teal-light);
+  background: var(--bg-mint-pill);
+  color: var(--color-teal-dark);
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.recalcBtn:hover {
+  background: var(--bg-selected-menu);
+}
