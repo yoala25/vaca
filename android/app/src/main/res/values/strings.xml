@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">휴가요정</string>
+    <string name="title_activity_main">휴가요정</string>
+    <string name="package_name">io.github.yoala25.hyugayojeong</string>
+    <string name="custom_url_scheme">io.github.yoala25.hyugayojeong</string>
+</resources>

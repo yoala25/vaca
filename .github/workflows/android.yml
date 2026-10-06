@@ -1,0 +1,73 @@
+name: Build Android APK
+
+# 수동으로 실행하거나, v1.0 같은 태그를 올리면 설치 파일을 만든다.
+# (코드를 올릴 때마다 돌리면 빌드가 5분쯤 걸려 낭비라 자동 실행은 하지 않는다.)
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+    # 앱 관련 파일이 바뀌면 빌드가 깨지지 않았는지 확인한다.
+    branches: [main]
+    paths:
+      - "android/**"
+      - "capacitor.config.ts"
+      - ".github/workflows/android.yml"
+      - "package-lock.json"
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # 안드로이드 빌드 도구(Gradle)는 자바 17 이상이 필요하다.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - run: npm ci
+
+      # 웹앱을 먼저 만든다. 연결 정보는 저장소 Secrets 에서 주입한다.
+      - name: Build web app
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+        run: npm run build
+
+      # 만들어진 웹앱을 안드로이드 프로젝트 안으로 복사한다.
+      - run: npx cap sync android
+
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             "out/hyugayojeong-${GITHUB_REF_NAME//\//-}.apk"
+          ls -lh out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hyugayojeong-apk
+          path: out/*.apk
+          retention-days: 90
+
+      # 태그를 올려 만든 경우에는 내려받기 쉽게 릴리스로도 올린다.
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk
+          generate_release_notes: true

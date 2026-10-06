@@ -1,5 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { supabase, oauthRedirectTo } from "./supabaseClient";
+import { isNativeApp, NATIVE_AUTH_REDIRECT } from "../../lib/nativeApp";
+import { Browser } from "@capacitor/browser";
 import type { AuthProviderId, AuthResult, AuthUser, SocialProvider } from "./authTypes";
 
 /** 앱에서 사용하는 소셜 제공자. */
@@ -106,6 +108,26 @@ export async function signInWithSocial(provider: SocialProvider): Promise<string
   if (!supabase) return "서버 연결이 설정되지 않았어요.";
   if (!SUPABASE_SOCIAL_PROVIDERS.includes(provider)) {
     return "이 로그인 방식은 아직 준비 중이에요.";
+  }
+
+  /*
+   * 안드로이드 앱에서는 앱 내장 브라우저로 구글 로그인을 할 수 없다.
+   * 구글이 "안전하지 않은 브라우저"라며 막기 때문이다(disallowed_useragent).
+   * 그래서 로그인 주소만 받아 시스템 브라우저로 열고,
+   * 끝나면 hyugayojeong://auth 로 앱이 다시 열린다(App.tsx 의 appUrlOpen 처리).
+   */
+  if (isNativeApp()) {
+    const { data, error: nativeError } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: NATIVE_AUTH_REDIRECT,
+        skipBrowserRedirect: true,
+      },
+    });
+    if (nativeError) return translateError(nativeError.message);
+    if (!data?.url) return "로그인 창을 열지 못했어요.";
+    await Browser.open({ url: data.url });
+    return null;
   }
 
   const { error } = await supabase.auth.signInWithOAuth({

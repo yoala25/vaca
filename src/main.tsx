@@ -7,6 +7,7 @@ import { PlannerProvider } from "./state/PlannerContext";
 import { UiProvider } from "./state/UiContext";
 import { AppRoutes } from "./app/router";
 import { AnalyticsTracker } from "./features/analytics";
+import { NativeAuthBridge } from "./features/auth/NativeAuthBridge";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -22,6 +23,8 @@ createRoot(document.getElementById("root")!).render(
         Supabase가 꺼져 있으면 조용히 아무 일도 하지 않는다.
       */}
       <AnalyticsTracker />
+      {/* 안드로이드 앱에서 구글 로그인을 마치고 돌아왔을 때 세션을 받아 준다(웹에서는 아무 일도 하지 않음). */}
+      <NativeAuthBridge />
       <AuthProvider>
         <PlannerProvider>
           <UiProvider>

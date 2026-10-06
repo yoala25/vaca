@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { adminSupabase, isAdminBackendConfigured } from "./adminClient";
+import { isNativeApp, NATIVE_AUTH_REDIRECT } from "../../lib/nativeApp";
+import { Browser } from "@capacitor/browser";
 
 /**
  * 관리자 인증 상태.
@@ -144,6 +146,17 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     if (!adminSupabase) return "서버 연결이 설정되지 않았습니다.";
     setPending(true);
     try {
+      // 앱에서는 구글이 내장 브라우저를 막으므로 시스템 브라우저로 연다.
+      if (isNativeApp()) {
+        const { data, error: nativeError } = await adminSupabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: NATIVE_AUTH_REDIRECT, skipBrowserRedirect: true },
+        });
+        if (nativeError || !data?.url) return "구글 로그인을 시작하지 못했습니다.";
+        await Browser.open({ url: data.url });
+        return null;
+      }
+
       const { error } = await adminSupabase.auth.signInWithOAuth({
         provider: "google",
         // 해시 라우터를 쓰므로 경로까지만 지정하고, 돌아온 뒤 #/admin 으로 옮긴다.
